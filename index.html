@@ -1,18 +1,41 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Flashcards de Classe</title>
   <style>
-    :root {
+    /* Variables de thèmes */
+    :root[data-theme="dark"] {
       --bg: #0f172a;
       --card-front: #1e293b;
       --card-back: #334155;
       --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --input-bg: #020617;
       --accent: #38bdf8;
+      --accent-hover: #0284c7;
       --danger: #f43f5e;
+      --danger-hover: #e11d48;
       --border: #475569;
+      --box-bg: rgba(30, 41, 59, 0.5);
+      --shadow: rgba(0, 0, 0, 0.4);
+    }
+
+    :root[data-theme="light"] {
+      --bg: #f8fafc;
+      --card-front: #ffffff;
+      --card-back: #e2e8f0;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --input-bg: #ffffff;
+      --accent: #0284c7;
+      --accent-hover: #0369a1;
+      --danger: #e11d48;
+      --danger-hover: #be123c;
+      --border: #cbd5e1;
+      --box-bg: rgba(255, 255, 255, 0.8);
+      --shadow: rgba(0, 0, 0, 0.1);
     }
 
     * {
@@ -20,6 +43,7 @@
       margin: 0;
       padding: 0;
       font-family: system-ui, -apple-system, sans-serif;
+      transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
     }
 
     body {
@@ -34,17 +58,40 @@
       position: relative;
     }
 
-    /* Notification visuelle (Toast) */
+    /* Bouton thème (haut à droite) */
+    #theme-toggle {
+      position: absolute;
+      top: 1.5rem;
+      right: 1.5rem;
+      background: var(--card-front);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.5rem 0.8rem;
+      border-radius: 9999px;
+      cursor: pointer;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      box-shadow: 0 2px 5px var(--shadow);
+      z-index: 100;
+    }
+
+    #theme-toggle:hover {
+      border-color: var(--accent);
+    }
+
+    /* Notification (Toast) */
     #toast {
       position: fixed;
       top: 20px;
-      background: rgba(56, 189, 248, 0.95);
-      color: #0f172a;
+      background: var(--accent);
+      color: #ffffff;
       padding: 0.65rem 1.25rem;
       border-radius: 9999px;
       font-weight: 700;
       font-size: 0.9rem;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+      box-shadow: 0 4px 15px var(--shadow);
       opacity: 0;
       transform: translateY(-20px);
       transition: opacity 0.3s ease, transform 0.3s ease;
@@ -57,13 +104,14 @@
       transform: translateY(0);
     }
 
-    /* Écran de configuration */
+    /* Configuration */
     #setup-view {
       width: 100%;
       max-width: 650px;
       display: flex;
       flex-direction: column;
       gap: 1.25rem;
+      margin-top: 2rem;
     }
 
     .setup-header {
@@ -73,139 +121,132 @@
     }
 
     .preset-box {
-      background: #1e293b80;
-      border: 1px dashed var(--accent);
-      padding: 1rem;
+      background: var(--box-bg);
+      border: 1px solid var(--border);
       border-radius: 8px;
+      padding: 1rem;
       display: flex;
       flex-direction: column;
       gap: 0.5rem;
     }
 
-    .preset-box label {
-      font-size: 0.85rem;
-      color: var(--accent);
+    label {
+      font-size: 0.9rem;
       font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
+      color: var(--accent);
     }
 
     textarea {
       width: 100%;
       height: 200px;
-      padding: 1rem;
-      border-radius: 8px;
-      background: var(--card-front);
+      background-color: var(--input-bg);
       color: var(--text);
       border: 1px solid var(--border);
-      resize: vertical;
-      font-size: 0.95rem;
-    }
-
-    .options {
-      display: flex;
-      gap: 0.75rem;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-
-    select, button {
-      padding: 0.75rem 1.25rem;
       border-radius: 8px;
-      border: none;
-      font-weight: 600;
-      cursor: pointer;
+      padding: 0.75rem;
+      font-family: monospace;
       font-size: 0.95rem;
-      transition: opacity 0.2s, background-color 0.2s;
+      resize: vertical;
+    }
+
+    textarea:focus, select:focus {
+      outline: 2px solid var(--accent);
+    }
+
+    .controls-row {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
     }
 
     select {
-      background: var(--card-front);
+      background-color: var(--input-bg);
       color: var(--text);
       border: 1px solid var(--border);
-      width: 100%;
+      padding: 0.5rem 0.75rem;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      cursor: pointer;
     }
 
-    .options select {
-      width: auto;
-      flex: 1;
-    }
-
-    button.primary {
-      background: var(--accent);
-      color: #000;
-      flex: 1.2;
-    }
-
-    button.secondary {
-      background: var(--card-front);
-      color: var(--text);
-      border: 1px solid var(--border);
-    }
-
-    button.danger {
-      background: transparent;
-      color: var(--danger);
-      border: 1px solid var(--danger);
-    }
-
-    button.danger:hover {
-      background: rgba(244, 63, 94, 0.15);
+    button {
+      background-color: var(--accent);
+      color: #ffffff;
+      border: none;
+      padding: 0.65rem 1.25rem;
+      font-size: 1rem;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.2s, transform 0.1s;
     }
 
     button:hover {
-      opacity: 0.9;
+      background-color: var(--accent-hover);
     }
 
-    /* Écran de révision */
-    #app-view {
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      width: 100%;
-      max-width: 650px;
-      gap: 1.5rem;
+    button:active {
+      transform: scale(0.98);
     }
 
-    .header-bar {
-      width: 100%;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 0.95rem;
-      color: #94a3b8;
+    button:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none;
     }
 
-    .actions-group {
-      display: flex;
-      gap: 0.5rem;
+    button.secondary {
+      background-color: var(--card-back);
+      color: var(--text);
     }
 
-    .btn-text {
-      background: transparent;
-      color: #94a3b8;
-      border: 1px solid var(--border);
+    button.secondary:hover {
+      background-color: var(--border);
+    }
+
+    button.danger {
+      background-color: transparent;
+      color: var(--danger);
+      border: 1px solid var(--danger);
       padding: 0.4rem 0.8rem;
       font-size: 0.85rem;
     }
 
-    .btn-text:hover {
-      color: var(--text);
-      border-color: var(--text);
+    button.danger:hover {
+      background-color: var(--danger);
+      color: #ffffff;
     }
 
-    .btn-text.shuffle-btn {
-      color: var(--accent);
-      border-color: rgba(56, 189, 248, 0.4);
+    /* Vue Flashcards */
+    #app-view {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.5rem;
+      width: 100%;
+      max-width: 650px;
+      margin-top: 2rem;
     }
 
-    /* Animation de carte 3D */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+    }
+
+    .counter {
+      font-size: 1.1rem;
+      font-weight: bold;
+      color: var(--text-muted);
+    }
+
+    /* Scène 3D */
     .scene {
       width: 100%;
-      height: 380px;
-      perspective: 1200px;
+      height: 360px;
+      perspective: 1000px;
       cursor: pointer;
-      user-select: none;
     }
 
     .card {
@@ -213,7 +254,9 @@
       height: 100%;
       position: relative;
       transform-style: preserve-3d;
-      transition: transform 0.5s cubic-bezier(0.4, 0.2, 0.2, 1);
+      transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+      box-shadow: 0 10px 25px var(--shadow);
+      border-radius: 12px;
     }
 
     .card.is-flipped {
@@ -225,16 +268,14 @@
       width: 100%;
       height: 100%;
       backface-visibility: hidden;
-      -webkit-backface-visibility: hidden;
-      border-radius: 16px;
-      padding: 2.5rem;
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
+      padding: 2.5rem;
       text-align: center;
+      border-radius: 12px;
       border: 2px solid var(--border);
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
     }
 
     .card-front {
@@ -246,170 +287,185 @@
       transform: rotateX(180deg);
     }
 
-    .card-label {
-      position: absolute;
-      top: 1rem;
-      left: 1.5rem;
-      font-size: 0.8rem;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      color: var(--accent);
-      font-weight: 700;
-    }
-
-    .card-content {
-      font-size: 1.4rem;
-      line-height: 1.6;
+    .card-text {
+      font-size: 1.75rem;
+      font-weight: 600;
+      line-height: 1.4;
       word-break: break-word;
     }
 
-    .nav-controls {
+    .face-badge {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      background: rgba(0, 0, 0, 0.15);
+      padding: 4px 10px;
+      border-radius: 4px;
+      color: var(--text-muted);
+    }
+
+    .card-nav {
       display: flex;
       gap: 1rem;
       width: 100%;
+      justify-content: center;
     }
 
-    .nav-controls button {
-      background: var(--card-front);
-      color: var(--text);
-      border: 1px solid var(--border);
+    .nav-btn {
       flex: 1;
+      padding: 0.75rem;
     }
 
-    .instructions {
+    .help-hint {
       font-size: 0.85rem;
-      color: #64748b;
+      color: var(--text-muted);
       text-align: center;
-      line-height: 1.4;
+      line-height: 1.5;
     }
 
-    .instructions kbd {
-      background: #1e293b;
+    kbd {
+      background: var(--card-front);
       border: 1px solid var(--border);
-      padding: 0.15rem 0.4rem;
       border-radius: 4px;
-      color: #cbd5e1;
+      padding: 2px 6px;
+      font-size: 0.8rem;
     }
   </style>
 </head>
 <body>
 
-  <!-- Toast de notification -->
-  <div id="toast">✨ Cartes mélangées !</div>
+  <!-- Bouton Thème -->
+  <button id="theme-toggle" title="Basculer le thème">
+    <span id="theme-icon">☀️</span>
+  </button>
 
-  <!-- 1. Écran de configuration -->
+  <div id="toast">Cartes mélangées !</div>
+
+  <!-- ÉCRAN CONFIGURATION -->
   <div id="setup-view">
     <div class="setup-header">
       <h2>Flashcards</h2>
-      <button class="danger" id="clear-btn" title="Vider la mémoire locale">
-        🗑️ Réinitialiser
-      </button>
+      <button id="clear-input-btn" class="danger">Tout effacer</button>
     </div>
 
+    <!-- Menus des decks préexistants -->
     <div class="preset-box">
-      <label for="repo-files-select">📁 Choisir une liste préexistante (dépôt GitHub)</label>
-      <select id="repo-files-select">
-        <option value="">Recherche des fichiers dans /decks ...</option>
+      <label for="github-deck-select">Sélectionner un fichier préexistant (Dépôt GitHub) :</label>
+      <select id="github-deck-select">
+        <option value="">Recherche des fichiers...</option>
       </select>
     </div>
 
     <div>
-      <p style="color: #94a3b8; font-size: 0.85rem; margin-bottom: 0.4rem;">
-        Ou collez directement votre liste manuelle ci-dessous :
-      </p>
-      <textarea id="csv-input" placeholder="Bonjour ; Hello&#10;Merci ; Thank you&#10;Pomme ; Apple"></textarea>
+      <label for="csv-input">Ou collez votre liste CSV / texte ci-dessous :</label>
+      <textarea id="csv-input" placeholder="Question 1 ; Réponse 1&#10;Question 2 ; Réponse 2&#10;Question 3 ; Réponse 3"></textarea>
     </div>
 
-    <div class="options">
-      <select id="delimiter-select">
-        <option value="auto">Détection auto du séparateur</option>
-        <option value=";">Point-virgule (;)</option>
-        <option value="/">Slash (/)</option>
-        <option value=",">Virgule (,)</option>
-        <option value="&#9;">Tabulation</option>
-      </select>
+    <div class="controls-row">
+      <div>
+        <label for="delimiter">Séparateur : </label>
+        <select id="delimiter">
+          <option value="auto">Détection automatique</option>
+          <option value=";">Point-virgule ( ; )</option>
+          <option value="/">Slash ( / )</option>
+          <option value=",">Virgule ( , )</option>
+          <option value="\t">Tabulation</option>
+        </select>
+      </div>
 
-      <button class="primary" id="start-btn">Démarrer (Ordre d'origine)</button>
+      <div style="margin-left: auto; display: flex; gap: 0.5rem;">
+        <button id="start-btn">Démarrer</button>
+      </div>
     </div>
   </div>
 
-  <!-- 2. Écran de révision -->
+  <!-- ÉCRAN FLASHCARDS -->
   <div id="app-view">
-    <div class="header-bar">
-      <span id="card-counter">Carte 0 / 0</span>
-      <div class="actions-group">
-        <button class="btn-text shuffle-btn" id="shuffle-btn" title="Mélanger à nouveau les cartes">
-          🔀 Mélanger
-        </button>
-        <button class="btn-text" id="edit-btn">Modifier</button>
-        <button class="btn-text" id="new-class-btn" style="color: var(--danger); border-color: rgba(244,63,94,0.4);">
-          Changer de liste (Vider)
-        </button>
-      </div>
+    <div class="top-bar">
+      <button id="edit-btn" class="secondary" title="Vider et changer de liste">Changer de classe</button>
+      <span class="counter" id="counter">Carte 0 / 0</span>
+      <button id="shuffle-btn" class="secondary" title="Mélanger l'ordre des cartes">🔀 Mélanger</button>
     </div>
 
     <div class="scene" id="card-scene">
-      <div class="card" id="card-element">
+      <div class="card" id="card">
         <div class="card-face card-front">
-          <span class="card-label">Recto</span>
-          <div class="card-content" id="recto-text">Question</div>
+          <div class="face-badge">Recto</div>
+          <div class="card-text" id="recto-text"></div>
         </div>
         <div class="card-face card-back">
-          <span class="card-label">Verso</span>
-          <div class="card-content" id="verso-text">Réponse</div>
+          <div class="face-badge">Verso</div>
+          <div class="card-text" id="verso-text"></div>
         </div>
       </div>
     </div>
 
-    <div class="nav-controls">
-      <button id="prev-btn">← Précédente</button>
-      <button id="flip-btn">Pivoter</button>
-      <button id="next-btn">Suivante →</button>
+    <div class="card-nav">
+      <button id="prev-btn" class="secondary nav-btn">← Précédent</button>
+      <button id="flip-btn" class="nav-btn">Retourner (Espace)</button>
+      <button id="next-btn" class="secondary nav-btn">Suivant →</button>
     </div>
 
-    <div class="instructions">
-      <kbd>↑</kbd> <kbd>↓</kbd> ou <kbd>Espace</kbd> pour pivoter | 
-      <kbd>←</kbd> <kbd>→</kbd> pour naviguer
+    <div class="help-hint">
+      Navigation : <kbd>←</kbd> Précédente | <kbd>→</kbd> Suivante | <kbd>↑</kbd> <kbd>↓</kbd> ou <kbd>Espace</kbd> Retourner
     </div>
   </div>
 
   <script>
-    const GITHUB_DECKS_FOLDER = 'decks';
+    // Configuration GitHub facultative pour les tests en local (ex: file:///)
     const MANUAL_GITHUB_USER = ''; 
     const MANUAL_GITHUB_REPO = ''; 
 
     let cards = [];
     let currentIndex = 0;
     let isFlipped = false;
-    let toastTimeout;
 
+    // Éléments UI
     const setupView = document.getElementById('setup-view');
     const appView = document.getElementById('app-view');
     const csvInput = document.getElementById('csv-input');
-    const delimiterSelect = document.getElementById('delimiter-select');
-    const repoFilesSelect = document.getElementById('repo-files-select');
-    const toast = document.getElementById('toast');
-
     const startBtn = document.getElementById('start-btn');
-    const shuffleBtn = document.getElementById('shuffle-btn');
-    const clearBtn = document.getElementById('clear-btn');
     const editBtn = document.getElementById('edit-btn');
-    const newClassBtn = document.getElementById('new-class-btn');
-
-    const cardElement = document.getElementById('card-element');
+    const clearInputBtn = document.getElementById('clear-input-btn');
+    const cardElement = document.getElementById('card');
     const rectoText = document.getElementById('recto-text');
     const versoText = document.getElementById('verso-text');
-    const counter = document.getElementById('card-counter');
-
     const prevBtn = document.getElementById('prev-btn');
     const nextBtn = document.getElementById('next-btn');
     const flipBtn = document.getElementById('flip-btn');
+    const shuffleBtn = document.getElementById('shuffle-btn');
+    const counter = document.getElementById('counter');
+    const delimiterSelect = document.getElementById('delimiter');
+    const githubSelect = document.getElementById('github-deck-select');
+    const toast = document.getElementById('toast');
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    const themeIcon = document.getElementById('theme-icon');
 
-    const savedData = localStorage.getItem('flashcards_data');
-    if (savedData) csvInput.value = savedData;
+    /* --- GESTION DU THÈME --- */
+    function initTheme() {
+      const savedTheme = localStorage.getItem('fc_theme') || 'dark';
+      setTheme(savedTheme);
+    }
 
-    // Affiche le message temporaire
-    function showNotification(message) {
+    function setTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      localStorage.setItem('fc_theme', theme);
+      themeIcon.textContent = theme === 'dark' ? '☀️' : '🌙';
+    }
+
+    themeToggleBtn.addEventListener('click', () => {
+      const current = document.documentElement.getAttribute('data-theme');
+      setTheme(current === 'dark' ? 'light' : 'dark');
+    });
+
+    initTheme();
+
+    /* --- NOTIFICATION (TOAST) --- */
+    let toastTimeout;
+    function showToast(message) {
       toast.innerText = message;
       toast.classList.add('show');
       clearTimeout(toastTimeout);
@@ -418,125 +474,122 @@
       }, 2000);
     }
 
-    // Chargement dynamique des CSV du dépôt GitHub
+    /* --- LECTURE DU DOSSIER DECKS GITHUB --- */
     async function loadGitHubDecks() {
       let user = MANUAL_GITHUB_USER;
       let repo = MANUAL_GITHUB_REPO;
 
-      const host = window.location.hostname;
-      const pathParts = window.location.pathname.split('/').filter(Boolean);
-
-      if (!user && host.endsWith('.github.io')) {
-        user = host.split('.')[0];
-        repo = pathParts[0] || '';
+      if (!user || !repo) {
+        const host = window.location.hostname;
+        const pathParts = window.location.pathname.split('/').filter(Boolean);
+        if (host.endsWith('.github.io') && pathParts.length > 0) {
+          user = host.replace('.github.io', '');
+          repo = pathParts[0];
+        }
       }
 
       if (!user || !repo) {
-        repoFilesSelect.innerHTML = '<option value="">(Détection repo GitHub active uniquement sur GitHub Pages)</option>';
+        githubSelect.innerHTML = '<option value="">(Détection active sur GitHub Pages)</option>';
+        githubSelect.disabled = true;
         return;
       }
 
-      const apiUrl = `https://api.github.com/repos/${user}/${repo}/contents/${GITHUB_DECKS_FOLDER}`;
-
       try {
-        const response = await fetch(apiUrl);
-        if (!response.ok) throw new Error('Dossier introuvable');
+        const apiUrl = `https://api.github.com/repos/${user}/${repo}/contents/decks`;
+        const res = await fetch(apiUrl);
 
-        const files = await response.json();
-        const csvFiles = files.filter(file => file.type === 'file' && file.name.toLowerCase().endsWith('.csv'));
-
-        if (csvFiles.length === 0) {
-          repoFilesSelect.innerHTML = `<option value="">Aucun fichier .csv trouvé dans /${GITHUB_DECKS_FOLDER}</option>`;
+        if (!res.ok) {
+          githubSelect.innerHTML = '<option value="">(Dossier /decks non trouvé sur le dépôt)</option>';
+          githubSelect.disabled = true;
           return;
         }
 
-        repoFilesSelect.innerHTML = '<option value="">-- Sélectionnez un fichier CSV préenregistré --</option>';
+        const files = await res.json();
+        const csvFiles = files.filter(f => f.name.toLowerCase().endsWith('.csv'));
+
+        if (csvFiles.length === 0) {
+          githubSelect.innerHTML = '<option value="">(Aucun fichier .csv trouvé dans /decks)</option>';
+          githubSelect.disabled = true;
+          return;
+        }
+
+        githubSelect.innerHTML = '<option value="">-- Choisir une liste existante --</option>';
         csvFiles.forEach(file => {
-          const option = document.createElement('option');
-          option.textContent = file.name.replace(/\.csv$/i, '');
-          option.value = file.download_url;
-          repoFilesSelect.appendChild(option);
+          const opt = document.createElement('option');
+          opt.value = file.download_url;
+          opt.textContent = file.name.replace(/\.[^/.]+$/, "");
+          githubSelect.appendChild(opt);
         });
 
       } catch (err) {
-        console.warn(err);
-        repoFilesSelect.innerHTML = `<option value="">Dossier /${GITHUB_DECKS_FOLDER} non trouvé sur le dépôt</option>`;
+        console.error(err);
+        githubSelect.innerHTML = '<option value="">(Impossible de charger les fichiers)</option>';
+        githubSelect.disabled = true;
       }
     }
 
-    repoFilesSelect.addEventListener('change', async () => {
-      const fileUrl = repoFilesSelect.value;
-      if (!fileUrl) return;
+    githubSelect.addEventListener('change', async () => {
+      const url = githubSelect.value;
+      if (!url) return;
 
+      csvInput.value = "Chargement en cours...";
       try {
-        const res = await fetch(fileUrl);
+        const res = await fetch(url);
+        if (!res.ok) throw new Error();
         const text = await res.text();
         csvInput.value = text;
       } catch (e) {
         alert("Erreur lors du téléchargement du fichier.");
+        csvInput.value = "";
       }
     });
 
     loadGitHubDecks();
 
-    function clearDatabase() {
-      const confirmDelete = confirm("Voulez-vous réinitialiser et préparer une nouvelle liste ?");
-      if (confirmDelete) {
-        localStorage.removeItem('flashcards_data');
-        csvInput.value = '';
-        repoFilesSelect.value = '';
+    /* --- FONCTIONS MÉMOIRE ET CARTES --- */
+    clearInputBtn.addEventListener('click', () => {
+      if (confirm("Voulez-vous effacer le contenu actuel ?")) {
+        csvInput.value = "";
+        githubSelect.value = "";
         cards = [];
-        currentIndex = 0;
-        appView.style.display = 'none';
-        setupView.style.display = 'flex';
-        csvInput.focus();
       }
-    }
-
-    clearBtn.addEventListener('click', clearDatabase);
-    newClassBtn.addEventListener('click', clearDatabase);
+    });
 
     function detectDelimiter(text) {
-      const candidates = [';', '/', '\t', ','];
-      let best = ';';
-      let maxCount = -1;
-      for (let delim of candidates) {
-        const count = (text.split(delim).length - 1);
-        if (count > maxCount) {
-          maxCount = count;
-          best = delim;
-        }
+      if (delimiterSelect.value !== 'auto') {
+        return delimiterSelect.value === '\\t' ? '\t' : delimiterSelect.value;
       }
-      return best;
+      const firstLine = text.split('\n').find(l => l.trim().length > 0) || '';
+      const counts = {
+        ';': (firstLine.match(/;/g) || []).length,
+        '/': (firstLine.match(/\//g) || []).length,
+        ',': (firstLine.match(/,/g) || []).length,
+        '\t': (firstLine.match(/\t/g) || []).length
+      };
+      return Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b);
     }
 
-    // Mélange Fisher-Yates
+    // Mélange de Fisher-Yates
     function shuffleArray(array) {
       for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [array[i], array[j]] = [array[j], array[i]];
       }
-      return array;
     }
 
-    // Mélanger en session active
     function shuffleCurrentDeck() {
       if (cards.length <= 1) return;
       shuffleArray(cards);
       currentIndex = 0;
       showCard();
-      showNotification("🔀 Les cartes ont été mélangées !");
+      showToast("Cartes mélangées ! 🔀");
     }
 
     function parseCards() {
       const text = csvInput.value.trim();
-      if (!text) return alert("Veuillez sélectionner ou coller une liste de cartes.");
+      if (!text) return alert("Veuillez coller des données ou sélectionner un fichier.");
 
-      localStorage.setItem('flashcards_data', text);
-
-      let delim = delimiterSelect.value;
-      if (delim === 'auto') delim = detectDelimiter(text);
-
+      const delim = detectDelimiter(text);
       const lines = text.split('\n');
       cards = [];
 
@@ -554,10 +607,8 @@
         return alert("Aucune carte valide trouvée. Vérifiez que votre séparateur correspond bien.");
       }
 
-      // Par défaut : Ordre d'origine conservé (pas de shuffle ici)
       currentIndex = 0;
       showCard();
-
       setupView.style.display = 'none';
       appView.style.display = 'flex';
     }
@@ -609,7 +660,7 @@
     nextBtn.addEventListener('click', nextCard);
     prevBtn.addEventListener('click', prevCard);
 
-    // Navigation clavier
+    // Navigation Clavier
     window.addEventListener('keydown', (e) => {
       if (document.activeElement === csvInput) return;
 
