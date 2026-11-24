@@ -19,6 +19,7 @@
       --danger-hover: #e11d48;
       --border: #475569;
       --box-bg: rgba(30, 41, 59, 0.5);
+      --hover-bg: rgba(148, 163, 184, 0.12);
       --shadow: rgba(0, 0, 0, 0.4);
     }
 
@@ -35,6 +36,7 @@
       --danger-hover: #be123c;
       --border: #cbd5e1;
       --box-bg: rgba(255, 255, 255, 0.8);
+      --hover-bg: rgba(15, 23, 42, 0.06);
       --shadow: rgba(0, 0, 0, 0.1);
     }
 
@@ -58,7 +60,7 @@
       position: relative;
     }
 
-    /* Bouton thème (haut à droite) */
+    /* Bouton thème */
     #theme-toggle {
       position: absolute;
       top: 1.5rem;
@@ -79,9 +81,10 @@
 
     #theme-toggle:hover {
       border-color: var(--accent);
+      background: var(--card-front);
     }
 
-    /* Notification (Toast) */
+    /* Toast */
     #toast {
       position: fixed;
       top: 20px;
@@ -127,17 +130,7 @@
       padding: 1rem;
       display: flex;
       flex-direction: column;
-      gap: 0.5rem;
-    }
-
-    .preset-box select,
-    .preset-box input[type="text"] {
-      width: 100%;
-    }
-
-    .deck-info {
-      font-size: 0.8rem;
-      color: var(--text-muted);
+      gap: 0.6rem;
     }
 
     label {
@@ -159,16 +152,7 @@
       resize: vertical;
     }
 
-    input[type="text"] {
-      background-color: var(--input-bg);
-      color: var(--text);
-      border: 1px solid var(--border);
-      padding: 0.5rem 0.75rem;
-      border-radius: 6px;
-      font-size: 0.95rem;
-    }
-
-    textarea:focus, select:focus, input[type="text"]:focus {
+    textarea:focus, select:focus, input[type="search"]:focus {
       outline: 2px solid var(--accent);
     }
 
@@ -176,6 +160,7 @@
       display: flex;
       gap: 1rem;
       align-items: center;
+      flex-wrap: wrap;
     }
 
     select {
@@ -236,12 +221,131 @@
       color: #ffffff;
     }
 
+    button.small {
+      padding: 0.3rem 0.65rem;
+      font-size: 0.8rem;
+    }
+
+    /* --- ARBRE DES DECKS --- */
+    .tree-toolbar {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .tree-toolbar input[type="search"] {
+      flex: 1;
+      min-width: 140px;
+      background-color: var(--input-bg);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.45rem 0.7rem;
+      font-size: 0.9rem;
+    }
+
+    #deck-tree {
+      max-height: 280px;
+      overflow-y: auto;
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.4rem;
+      font-size: 0.95rem;
+      user-select: none;
+    }
+
+    #deck-tree .tree-message {
+      color: var(--text-muted);
+      padding: 0.75rem;
+      text-align: center;
+      font-size: 0.9rem;
+    }
+
+    .tree-node {
+      list-style: none;
+    }
+
+    .tree-children {
+      margin-left: 1.15rem;
+      padding-left: 0.4rem;
+      border-left: 1px dashed var(--border);
+    }
+
+    .tree-children.collapsed {
+      display: none;
+    }
+
+    .tree-row {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.28rem 0.4rem;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .tree-row:hover {
+      background: var(--hover-bg);
+    }
+
+    .tree-toggle {
+      width: 1.1rem;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.7rem;
+      flex-shrink: 0;
+      transition: transform 0.15s ease;
+    }
+
+    .tree-toggle.open {
+      transform: rotate(90deg);
+    }
+
+    .tree-toggle.leaf {
+      visibility: hidden;
+    }
+
+    .tree-row input[type="checkbox"] {
+      accent-color: var(--accent);
+      width: 1rem;
+      height: 1rem;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .tree-label {
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .tree-label.folder {
+      font-weight: 600;
+    }
+
+    .tree-count {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      background: var(--hover-bg);
+      border-radius: 9999px;
+      padding: 1px 8px;
+      flex-shrink: 0;
+    }
+
+    .tree-summary {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
     /* Vue Flashcards */
     #app-view {
       display: none;
       flex-direction: column;
       align-items: center;
-      gap: 1.5rem;
+      gap: 1.25rem;
       width: 100%;
       max-width: 650px;
       margin-top: 2rem;
@@ -271,12 +375,30 @@
       white-space: nowrap;
     }
 
+    /* Barre de progression */
+    .progress-track {
+      width: 100%;
+      height: 6px;
+      background: var(--card-back);
+      border-radius: 9999px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: var(--accent);
+      border-radius: 9999px;
+      transition: width 0.3s ease;
+    }
+
     /* Scène 3D */
     .scene {
       width: 100%;
       height: 360px;
       perspective: 1000px;
       cursor: pointer;
+      touch-action: pan-y pinch-zoom;
     }
 
     .card {
@@ -322,6 +444,7 @@
       font-weight: 600;
       line-height: 1.4;
       word-break: break-word;
+      white-space: pre-line;
     }
 
     .face-badge {
@@ -353,7 +476,16 @@
       font-size: 0.85rem;
       color: var(--text-muted);
       text-align: center;
-      line-height: 1.5;
+      line-height: 1.6;
+    }
+
+    .touch-hint {
+      display: none;
+    }
+
+    @media (pointer: coarse) {
+      .touch-hint { display: block; }
+      .kbd-hint { display: none; }
     }
 
     kbd {
@@ -373,12 +505,25 @@
       .counter {
         font-size: 0.95rem;
       }
+
+      .card-text {
+        font-size: 1.4rem;
+      }
+
+      .card-face {
+        padding: 1.75rem 1.25rem;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .card, .progress-fill {
+        transition: none;
+      }
     }
   </style>
 </head>
 <body>
 
-  <!-- Bouton Thème -->
   <button id="theme-toggle" title="Basculer le thème">
     <span id="theme-icon">☀️</span>
   </button>
@@ -392,19 +537,31 @@
       <button id="clear-input-btn" class="danger">Tout effacer</button>
     </div>
 
-    <!-- Menu des decks préexistants (avec sous-dossiers) -->
+    <!-- Arbre des decks -->
     <div class="preset-box">
-      <label for="github-deck-select">Sélectionner un deck préexistant (dossier /decks et sous-dossiers) :</label>
-      <input type="text" id="deck-filter" placeholder="🔍 Filtrer par nom ou par dossier..." style="display:none;">
-      <select id="github-deck-select">
-        <option value="">Recherche des fichiers...</option>
-      </select>
-      <div class="deck-info" id="deck-info"></div>
+      <label>Decks du dépôt GitHub (cochez un ou plusieurs fichiers / dossiers) :</label>
+
+      <div class="tree-toolbar">
+        <input type="search" id="tree-filter" placeholder="Filtrer les decks…">
+        <button id="expand-all-btn" class="secondary small" title="Tout déplier">Déplier</button>
+        <button id="collapse-all-btn" class="secondary small" title="Tout replier">Replier</button>
+        <button id="uncheck-all-btn" class="secondary small" title="Tout décocher">Décocher</button>
+      </div>
+
+      <div id="deck-tree">
+        <div class="tree-message">Recherche des fichiers...</div>
+      </div>
+
+      <div class="tree-summary" id="tree-summary"></div>
+
+      <div>
+        <button id="load-selected-btn" class="secondary" disabled>Charger la sélection dans la zone de texte</button>
+      </div>
     </div>
 
     <div>
       <label for="csv-input">Ou collez votre liste CSV / texte ci-dessous :</label>
-      <textarea id="csv-input" placeholder="Question 1 ; Réponse 1&#10;Question 2 ; Réponse 2&#10;Question 3 ; Réponse 3"></textarea>
+      <textarea id="csv-input" placeholder="Question 1 ; Réponse 1&#10;Question 2 ; Réponse 2&#10;"Question, avec virgule" ; "Réponse sur&#10;deux lignes""></textarea>
     </div>
 
     <div class="controls-row">
@@ -429,8 +586,12 @@
   <div id="app-view">
     <div class="top-bar">
       <button id="edit-btn" class="secondary" title="Vider et changer de liste">Changer de liste</button>
-      <span class="counter" id="counter">Carte 0 / 0</span>
+      <span class="counter" id="counter" aria-live="polite">Carte 0 / 0</span>
       <button id="shuffle-btn" class="secondary" title="Mélanger l'ordre des cartes">🔀 Mélanger</button>
+    </div>
+
+    <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progress-track">
+      <div class="progress-fill" id="progress-fill"></div>
     </div>
 
     <div class="scene" id="card-scene">
@@ -453,51 +614,79 @@
     </div>
 
     <div class="help-hint">
-      Navigation : <kbd>←</kbd> Précédente | <kbd>→</kbd> Suivante | <kbd>↑</kbd> <kbd>↓</kbd> ou <kbd>Espace</kbd> Retourner
+      <div class="kbd-hint">
+        Navigation : <kbd>←</kbd> Précédente | <kbd>→</kbd> Suivante | <kbd>↑</kbd> <kbd>↓</kbd> ou <kbd>Espace</kbd> Retourner
+      </div>
+      <div class="touch-hint">
+        Glissez ← → pour naviguer, ↑ ↓ pour retourner la carte
+      </div>
     </div>
   </div>
 
   <script>
-    // Configuration GitHub facultative pour les tests en local (ex: file:///)
+    /* ======================================================
+       CONFIGURATION GITHUB (facultative, utile en local)
+       ====================================================== */
     const MANUAL_GITHUB_USER = '';
     const MANUAL_GITHUB_REPO = '';
-    const MANUAL_GITHUB_BRANCH = ''; // laisser vide = branche par défaut du dépôt
-    const DECKS_ROOT = 'decks';      // dossier racine contenant les decks
+    const MANUAL_GITHUB_BRANCH = ''; // vide = branche par défaut détectée
+    const DECKS_ROOT = 'decks';
 
+    /* ======================================================
+       ÉTAT
+       ====================================================== */
     let cards = [];
     let currentIndex = 0;
     let isFlipped = false;
 
-    // Liste à plat de tous les decks trouvés : { path, folder, name, url }
-    let allDecks = [];
+    // Arbre : racine { folders: Map, files: [] }
+    let treeRoot = null;
+    let ghInfo = null;                 // { user, repo, branch }
+    const checkedFiles = new Set();    // chemins complets (decks/xx/yy.csv)
 
-    // Éléments UI
-    const setupView = document.getElementById('setup-view');
-    const appView = document.getElementById('app-view');
-    const csvInput = document.getElementById('csv-input');
-    const startBtn = document.getElementById('start-btn');
-    const editBtn = document.getElementById('edit-btn');
-    const clearInputBtn = document.getElementById('clear-input-btn');
-    const cardElement = document.getElementById('card');
-    const rectoText = document.getElementById('recto-text');
-    const versoText = document.getElementById('verso-text');
-    const prevBtn = document.getElementById('prev-btn');
-    const nextBtn = document.getElementById('next-btn');
-    const flipBtn = document.getElementById('flip-btn');
-    const shuffleBtn = document.getElementById('shuffle-btn');
-    const counter = document.getElementById('counter');
-    const delimiterSelect = document.getElementById('delimiter');
-    const githubSelect = document.getElementById('github-deck-select');
-    const deckFilter = document.getElementById('deck-filter');
-    const deckInfo = document.getElementById('deck-info');
-    const toast = document.getElementById('toast');
-    const themeToggleBtn = document.getElementById('theme-toggle');
-    const themeIcon = document.getElementById('theme-icon');
+    /* ======================================================
+       ÉLÉMENTS UI
+       ====================================================== */
+    const $ = (id) => document.getElementById(id);
 
-    /* --- GESTION DU THÈME --- */
+    const setupView = $('setup-view');
+    const appView = $('app-view');
+    const csvInput = $('csv-input');
+    const startBtn = $('start-btn');
+    const editBtn = $('edit-btn');
+    const clearInputBtn = $('clear-input-btn');
+    const cardElement = $('card');
+    const cardScene = $('card-scene');
+    const rectoText = $('recto-text');
+    const versoText = $('verso-text');
+    const prevBtn = $('prev-btn');
+    const nextBtn = $('next-btn');
+    const flipBtn = $('flip-btn');
+    const shuffleBtn = $('shuffle-btn');
+    const counter = $('counter');
+    const progressFill = $('progress-fill');
+    const progressTrack = $('progress-track');
+    const delimiterSelect = $('delimiter');
+    const toast = $('toast');
+    const themeToggleBtn = $('theme-toggle');
+    const themeIcon = $('theme-icon');
+
+    const deckTreeEl = $('deck-tree');
+    const treeFilter = $('tree-filter');
+    const treeSummary = $('tree-summary');
+    const expandAllBtn = $('expand-all-btn');
+    const collapseAllBtn = $('collapse-all-btn');
+    const uncheckAllBtn = $('uncheck-all-btn');
+    const loadSelectedBtn = $('load-selected-btn');
+
+    /* ======================================================
+       THÈME
+       ====================================================== */
     function initTheme() {
-      const savedTheme = localStorage.getItem('fc_theme') || 'dark';
-      setTheme(savedTheme);
+      const saved = localStorage.getItem('fc_theme');
+      if (saved) return setTheme(saved);
+      const prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+      setTheme(prefersLight ? 'light' : 'dark');
     }
 
     function setTheme(theme) {
@@ -513,28 +702,37 @@
 
     initTheme();
 
-    /* --- NOTIFICATION (TOAST) --- */
+    /* ======================================================
+       TOAST
+       ====================================================== */
     let toastTimeout;
     function showToast(message) {
       toast.innerText = message;
       toast.classList.add('show');
       clearTimeout(toastTimeout);
-      toastTimeout = setTimeout(() => {
-        toast.classList.remove('show');
-      }, 2000);
+      toastTimeout = setTimeout(() => toast.classList.remove('show'), 2000);
     }
 
-    /* --- LECTURE RÉCURSIVE DU DOSSIER /decks (GitHub) --- */
-    function setSelectMessage(message, disabled = true) {
-      githubSelect.innerHTML = '';
-      const opt = document.createElement('option');
-      opt.value = '';
-      opt.textContent = message;
-      githubSelect.appendChild(opt);
-      githubSelect.disabled = disabled;
-      deckFilter.style.display = 'none';
+    /* ======================================================
+       UTILITAIRES
+       ====================================================== */
+    const collator = new Intl.Collator('fr', { numeric: true, sensitivity: 'base' });
+
+    function encodePath(path) {
+      return path.split('/').map(encodeURIComponent).join('/');
     }
 
+    function displayName(filename) {
+      return filename.replace(/\.[^/.]+$/, '');
+    }
+
+    function normalize(str) {
+      return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    }
+
+    /* ======================================================
+       ARBORESCENCE GITHUB (récursive)
+       ====================================================== */
     function detectRepo() {
       let user = MANUAL_GITHUB_USER;
       let repo = MANUAL_GITHUB_REPO;
@@ -547,169 +745,424 @@
           repo = pathParts[0];
         }
       }
-      return { user, repo };
+      return (user && repo) ? { user, repo } : null;
     }
 
-    // Encode chaque segment du chemin (espaces, accents, # etc.)
-    function encodePath(path) {
-      return path.split('/').map(encodeURIComponent).join('/');
+    function buildTree(filePaths) {
+      const root = { name: '', path: DECKS_ROOT, folders: new Map(), files: [] };
+      const prefix = DECKS_ROOT + '/';
+
+      for (const fullPath of filePaths) {
+        const rel = fullPath.slice(prefix.length);
+        const parts = rel.split('/');
+        const filename = parts.pop();
+
+        let node = root;
+        let acc = DECKS_ROOT;
+        for (const part of parts) {
+          acc += '/' + part;
+          if (!node.folders.has(part)) {
+            node.folders.set(part, { name: part, path: acc, folders: new Map(), files: [] });
+          }
+          node = node.folders.get(part);
+        }
+        node.files.push({ name: filename, path: fullPath });
+      }
+      return root;
+    }
+
+    function setTreeMessage(msg) {
+      deckTreeEl.innerHTML = '';
+      const div = document.createElement('div');
+      div.className = 'tree-message';
+      div.textContent = msg;
+      deckTreeEl.appendChild(div);
+      expandAllBtn.disabled = collapseAllBtn.disabled = uncheckAllBtn.disabled = true;
+      treeFilter.disabled = true;
     }
 
     async function loadGitHubDecks() {
-      const { user, repo } = detectRepo();
-
-      if (!user || !repo) {
-        setSelectMessage('(Détection active sur GitHub Pages)');
+      const detected = detectRepo();
+      if (!detected) {
+        setTreeMessage('(Détection active sur GitHub Pages — ou renseignez MANUAL_GITHUB_USER / REPO dans le script)');
         return;
       }
 
       try {
-        // 1) Branche : manuelle ou branche par défaut du dépôt
         let branch = MANUAL_GITHUB_BRANCH;
         if (!branch) {
-          const repoRes = await fetch(`https://api.github.com/repos/${user}/${repo}`);
-          if (!repoRes.ok) throw new Error('Dépôt introuvable');
-          const repoData = await repoRes.json();
-          branch = repoData.default_branch;
+          const repoRes = await fetch(`https://api.github.com/repos/${detected.user}/${detected.repo}`);
+          if (!repoRes.ok) throw new Error('repo');
+          branch = (await repoRes.json()).default_branch;
         }
 
-        // 2) Arborescence complète en UNE requête (récursive côté GitHub)
+        ghInfo = { user: detected.user, repo: detected.repo, branch };
+
+        // Un seul appel pour tout l'arbre (récursif)
         const treeRes = await fetch(
-          `https://api.github.com/repos/${user}/${repo}/git/trees/${encodeURIComponent(branch)}?recursive=1`
+          `https://api.github.com/repos/${ghInfo.user}/${ghInfo.repo}/git/trees/${encodeURIComponent(branch)}?recursive=1`
         );
-        if (!treeRes.ok) throw new Error('Arborescence inaccessible');
-        const treeData = await treeRes.json();
+        if (!treeRes.ok) throw new Error('tree');
+        const data = await treeRes.json();
+
+        if (data.truncated) {
+          console.warn('Arborescence tronquée par GitHub : certains decks peuvent manquer.');
+        }
 
         const prefix = DECKS_ROOT + '/';
-        const files = (treeData.tree || []).filter(item =>
-          item.type === 'blob' &&
-          item.path.startsWith(prefix) &&
-          item.path.toLowerCase().endsWith('.csv')
-        );
+        const csvPaths = data.tree
+          .filter(n => n.type === 'blob' && n.path.startsWith(prefix) && n.path.toLowerCase().endsWith('.csv'))
+          .map(n => n.path);
 
-        if (files.length === 0) {
-          setSelectMessage(`(Aucun fichier .csv trouvé dans /${DECKS_ROOT})`);
+        if (csvPaths.length === 0) {
+          setTreeMessage('(Aucun fichier .csv trouvé dans /decks)');
           return;
         }
 
-        allDecks = files.map(f => {
-          const relative = f.path.slice(prefix.length);       // ex: "histoire/rome/rois.csv"
-          const parts = relative.split('/');
-          const fileName = parts.pop();                       // "rois.csv"
-          return {
-            path: relative,
-            folder: parts.join(' / '),                        // "histoire / rome"
-            name: fileName.replace(/\.[^/.]+$/, ''),          // "rois"
-            url: `https://raw.githubusercontent.com/${encodeURIComponent(user)}/${encodeURIComponent(repo)}/${encodeURIComponent(branch)}/${encodePath(f.path)}`
-          };
-        });
-
-        // Tri : dossier puis nom (ordre naturel, insensible à la casse/accents)
-        const collator = new Intl.Collator('fr', { numeric: true, sensitivity: 'base' });
-        allDecks.sort((a, b) =>
-          collator.compare(a.folder, b.folder) || collator.compare(a.name, b.name)
-        );
-
-        deckFilter.style.display = allDecks.length > 8 ? 'block' : 'none';
-        renderDeckSelect('');
-
-        if (treeData.truncated) {
-          deckInfo.textContent = '⚠️ Arborescence très volumineuse : la liste peut être incomplète.';
-        }
+        treeRoot = buildTree(csvPaths);
+        renderTree();
       } catch (err) {
         console.error(err);
-        setSelectMessage('(Impossible de charger les fichiers)');
+        setTreeMessage('(Impossible de charger les fichiers du dépôt)');
       }
     }
 
-    // Construit le <select> groupé par dossier, avec filtre optionnel
-    function renderDeckSelect(filterText) {
-      const q = filterText.trim().toLowerCase();
-      const filtered = allDecks.filter(d =>
-        !q || d.path.toLowerCase().includes(q)
-      );
-
-      githubSelect.innerHTML = '';
-      githubSelect.disabled = false;
-
-      const placeholder = document.createElement('option');
-      placeholder.value = '';
-      placeholder.textContent = filtered.length
-        ? '-- Choisir une liste existante --'
-        : '(Aucun résultat)';
-      githubSelect.appendChild(placeholder);
-
-      // Groupement par dossier ("" = racine de /decks)
-      const groups = new Map();
-      filtered.forEach(d => {
-        if (!groups.has(d.folder)) groups.set(d.folder, []);
-        groups.get(d.folder).push(d);
-      });
-
-      groups.forEach((decks, folder) => {
-        const parent = folder
-          ? Object.assign(document.createElement('optgroup'), { label: '📁 ' + folder })
-          : githubSelect;
-
-        decks.forEach(d => {
-          const opt = document.createElement('option');
-          opt.value = d.url;
-          opt.textContent = d.name;
-          opt.dataset.path = d.path;
-          parent.appendChild(opt);
-        });
-
-        if (folder) githubSelect.appendChild(parent);
-      });
-
-      deckInfo.textContent = `${filtered.length} deck(s)` +
-        (q ? ` sur ${allDecks.length}` : '') + ' trouvé(s)';
+    /* ======================================================
+       ARBRE : RENDU, SÉLECTION, FILTRE
+       ====================================================== */
+    function collectFiles(node, out = []) {
+      node.files.forEach(f => out.push(f.path));
+      node.folders.forEach(sub => collectFiles(sub, out));
+      return out;
     }
 
-    deckFilter.addEventListener('input', () => renderDeckSelect(deckFilter.value));
+    function sortedFolders(node) {
+      return [...node.folders.values()].sort((a, b) => collator.compare(a.name, b.name));
+    }
 
-    githubSelect.addEventListener('change', async () => {
-      const url = githubSelect.value;
-      if (!url) return;
+    function sortedFiles(node) {
+      return [...node.files].sort((a, b) => collator.compare(a.name, b.name));
+    }
 
+    // Retourne true si le noeud (ou un descendant) correspond au filtre
+    function nodeMatches(node, query) {
+      if (!query) return true;
+      if (normalize(node.name || '').includes(query)) return true;
+      if (node.files.some(f => normalize(f.path).includes(query))) return true;
+      for (const sub of node.folders.values()) {
+        if (nodeMatches(sub, query)) return true;
+      }
+      return false;
+    }
+
+    function renderTree() {
+      const query = normalize(treeFilter.value.trim());
+      const openState = captureOpenState();
+
+      deckTreeEl.innerHTML = '';
+      expandAllBtn.disabled = collapseAllBtn.disabled = uncheckAllBtn.disabled = false;
+      treeFilter.disabled = false;
+
+      const rootUl = document.createElement('ul');
+      rootUl.style.listStyle = 'none';
+      renderChildren(treeRoot, rootUl, query, openState, 0);
+
+      if (!rootUl.children.length) {
+        setTreeMessage('Aucun deck ne correspond au filtre.');
+        treeFilter.disabled = false;
+        expandAllBtn.disabled = collapseAllBtn.disabled = false;
+        return;
+      }
+
+      deckTreeEl.appendChild(rootUl);
+      refreshCheckStates();
+    }
+
+    function captureOpenState() {
+      const state = new Set();
+      deckTreeEl.querySelectorAll('.tree-node[data-folder]').forEach(li => {
+        const ch = li.querySelector(':scope > .tree-children');
+        if (ch && !ch.classList.contains('collapsed')) state.add(li.dataset.folder);
+      });
+      return state;
+    }
+
+    function renderChildren(node, ul, query, openState, depth) {
+      for (const folder of sortedFolders(node)) {
+        if (!nodeMatches(folder, query)) continue;
+        ul.appendChild(renderFolder(folder, query, openState, depth));
+      }
+      for (const file of sortedFiles(node)) {
+        if (query && !normalize(file.path).includes(query) && !folderNameMatchesPath(file.path, query)) continue;
+        ul.appendChild(renderFile(file));
+      }
+    }
+
+    function folderNameMatchesPath(path, query) {
+      return normalize(path).includes(query);
+    }
+
+    function renderFolder(folder, query, openState, depth) {
+      const li = document.createElement('li');
+      li.className = 'tree-node';
+      li.dataset.folder = folder.path;
+
+      const row = document.createElement('div');
+      row.className = 'tree-row';
+
+      const toggle = document.createElement('span');
+      toggle.className = 'tree-toggle';
+      toggle.textContent = '▶';
+
+      const cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.dataset.folderCb = folder.path;
+
+      const label = document.createElement('span');
+      label.className = 'tree-label folder';
+      label.textContent = '📁 ' + folder.name;
+
+      const total = collectFiles(folder).length;
+      const count = document.createElement('span');
+      count.className = 'tree-count';
+      count.textContent = total;
+
+      row.append(toggle, cb, label, count);
+
+      const childrenUl = document.createElement('ul');
+      childrenUl.className = 'tree-children';
+      childrenUl.style.listStyle = 'none';
+      renderChildren(folder, childrenUl, query, openState, depth + 1);
+
+      // Ouvert si : filtre actif, ou déjà ouvert avant re-rendu
+      const shouldOpen = !!query || openState.has(folder.path);
+      if (!shouldOpen) childrenUl.classList.add('collapsed');
+      toggle.classList.toggle('open', shouldOpen);
+
+      const toggleOpen = () => {
+        const collapsed = childrenUl.classList.toggle('collapsed');
+        toggle.classList.toggle('open', !collapsed);
+      };
+
+      toggle.addEventListener('click', (e) => { e.stopPropagation(); toggleOpen(); });
+      label.addEventListener('click', (e) => { e.stopPropagation(); toggleOpen(); });
+      count.addEventListener('click', (e) => { e.stopPropagation(); toggleOpen(); });
+
+      cb.addEventListener('click', (e) => e.stopPropagation());
+      cb.addEventListener('change', () => {
+        const files = collectFiles(folder);
+        files.forEach(p => cb.checked ? checkedFiles.add(p) : checkedFiles.delete(p));
+        refreshCheckStates();
+      });
+
+      row.addEventListener('click', toggleOpen);
+
+      li.append(row, childrenUl);
+      return li;
+    }
+
+    function renderFile(file) {
+      const li = document.createElement('li');
+      li.className = 'tree-node';
+
+      const row = document.createElement('div');
+      row.className = 'tree-row';
+
+      const spacer = document.createElement('span');
+      spacer.className = 'tree-toggle leaf';
+      spacer.textContent = '▶';
+
+      const cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.dataset.filePath = file.path;
+      cb.addEventListener('click', (e) => e.stopPropagation());
+      cb.addEventListener('change', () => {
+        cb.checked ? checkedFiles.add(file.path) : checkedFiles.delete(file.path);
+        refreshCheckStates();
+      });
+
+      const label = document.createElement('span');
+      label.className = 'tree-label';
+      label.textContent = '📄 ' + displayName(file.name);
+      label.title = file.path;
+
+      row.addEventListener('click', () => cb.click());
+
+      row.append(spacer, cb, label);
+      li.appendChild(row);
+      return li;
+    }
+
+    // Met à jour les cases (état coché / indéterminé) et le résumé
+    function refreshCheckStates() {
+      deckTreeEl.querySelectorAll('input[data-file-path]').forEach(cb => {
+        cb.checked = checkedFiles.has(cb.dataset.filePath);
+      });
+
+      deckTreeEl.querySelectorAll('input[data-folder-cb]').forEach(cb => {
+        const folder = findFolder(treeRoot, cb.dataset.folderCb);
+        if (!folder) return;
+        const files = collectFiles(folder);
+        const n = files.filter(p => checkedFiles.has(p)).length;
+        cb.checked = n > 0 && n === files.length;
+        cb.indeterminate = n > 0 && n < files.length;
+      });
+
+      const n = checkedFiles.size;
+      treeSummary.textContent = n === 0
+        ? 'Aucun deck sélectionné.'
+        : `${n} deck${n > 1 ? 's' : ''} sélectionné${n > 1 ? 's' : ''}.`;
+      loadSelectedBtn.disabled = n === 0;
+    }
+
+    function findFolder(node, path) {
+      if (node.path === path) return node;
+      for (const sub of node.folders.values()) {
+        const found = findFolder(sub, path);
+        if (found) return found;
+      }
+      return null;
+    }
+
+    function setAllOpen(open) {
+      deckTreeEl.querySelectorAll('.tree-children').forEach(ul => ul.classList.toggle('collapsed', !open));
+      deckTreeEl.querySelectorAll('.tree-toggle:not(.leaf)').forEach(t => t.classList.toggle('open', open));
+    }
+
+    treeFilter.addEventListener('input', () => { if (treeRoot) renderTree(); });
+    expandAllBtn.addEventListener('click', () => setAllOpen(true));
+    collapseAllBtn.addEventListener('click', () => setAllOpen(false));
+    uncheckAllBtn.addEventListener('click', () => {
+      checkedFiles.clear();
+      refreshCheckStates();
+    });
+
+    // Charge tous les fichiers cochés et les fusionne dans la zone de texte
+    loadSelectedBtn.addEventListener('click', async () => {
+      if (!ghInfo || checkedFiles.size === 0) return;
+
+      const paths = [...checkedFiles].sort(collator.compare);
+      loadSelectedBtn.disabled = true;
       csvInput.value = 'Chargement en cours...';
+
       try {
-        const res = await fetch(url);
-        if (!res.ok) throw new Error();
-        const text = await res.text();
-        csvInput.value = text;
+        const texts = await Promise.all(paths.map(async (p) => {
+          const url = `https://raw.githubusercontent.com/${ghInfo.user}/${ghInfo.repo}/${encodeURIComponent(ghInfo.branch)}/${encodePath(p)}`;
+          const res = await fetch(url);
+          if (!res.ok) throw new Error(p);
+          let t = await res.text();
+          if (t.charCodeAt(0) === 0xFEFF) t = t.slice(1);   // BOM
+          return t.replace(/\r\n?/g, '\n').trim();
+        }));
+
+        csvInput.value = texts.filter(Boolean).join('\n');
+        showToast(`${paths.length} deck${paths.length > 1 ? 's' : ''} chargé${paths.length > 1 ? 's' : ''} ✓`);
       } catch (e) {
-        alert('Erreur lors du téléchargement du fichier.');
+        alert('Erreur lors du téléchargement de : ' + e.message);
         csvInput.value = '';
+      } finally {
+        loadSelectedBtn.disabled = checkedFiles.size === 0;
       }
     });
 
     loadGitHubDecks();
 
-    /* --- FONCTIONS MÉMOIRE ET CARTES --- */
-    clearInputBtn.addEventListener('click', () => {
-      if (confirm('Voulez-vous effacer le contenu actuel ?')) {
-        csvInput.value = '';
-        githubSelect.value = '';
-        cards = [];
-      }
-    });
-
+    /* ======================================================
+       PARSEUR CSV (guillemets, séparateurs dans les cellules,
+       retours à la ligne dans les cellules, "" échappés)
+       ====================================================== */
     function detectDelimiter(text) {
       if (delimiterSelect.value !== 'auto') {
         return delimiterSelect.value === '\\t' ? '\t' : delimiterSelect.value;
       }
-      const firstLine = text.split('\n').find(l => l.trim().length > 0) || '';
-      const counts = {
-        ';': (firstLine.match(/;/g) || []).length,
-        '/': (firstLine.match(/\//g) || []).length,
-        ',': (firstLine.match(/,/g) || []).length,
-        '\t': (firstLine.match(/\t/g) || []).length
-      };
-      return Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b);
+
+      // On compte les séparateurs hors guillemets sur les premières lignes
+      const candidates = [';', '\t', ',', '/'];
+      const counts = Object.fromEntries(candidates.map(c => [c, 0]));
+
+      let inQuotes = false;
+      let lines = 0;
+      for (let i = 0; i < text.length && lines < 5; i++) {
+        const ch = text[i];
+        if (ch === '"') {
+          if (inQuotes && text[i + 1] === '"') { i++; continue; }
+          inQuotes = !inQuotes;
+        } else if (!inQuotes) {
+          if (ch === '\n') { lines++; }
+          else if (counts[ch] !== undefined) counts[ch]++;
+        }
+      }
+
+      const best = candidates.reduce((a, b) => counts[b] > counts[a] ? b : a);
+      return counts[best] > 0 ? best : ';';
     }
 
-    // Mélange de Fisher-Yates
+    // Retourne un tableau de lignes, chaque ligne = tableau de cellules
+    function parseCSV(text, delim) {
+      const rows = [];
+      let row = [];
+      let cell = '';
+      let inQuotes = false;
+      let wasQuoted = false;
+
+      const endCell = () => {
+        row.push(wasQuoted ? cell : cell.trim());
+        cell = '';
+        wasQuoted = false;
+      };
+      const endRow = () => {
+        endCell();
+        if (row.some(c => c !== '')) rows.push(row);
+        row = [];
+      };
+
+      text = text.replace(/\r\n?/g, '\n');
+
+      for (let i = 0; i < text.length; i++) {
+        const ch = text[i];
+
+        if (inQuotes) {
+          if (ch === '"') {
+            if (text[i + 1] === '"') { cell += '"'; i++; }
+            else inQuotes = false;
+          } else {
+            cell += ch;
+          }
+          continue;
+        }
+
+        if (ch === '"' && cell.trim() === '') {
+          // Début de cellule entre guillemets
+          inQuotes = true;
+          wasQuoted = true;
+          cell = '';
+        } else if (ch === delim) {
+          endCell();
+        } else if (ch === '\n') {
+          endRow();
+        } else {
+          cell += ch;
+        }
+      }
+
+      // Dernière ligne sans saut de ligne final
+      if (cell !== '' || row.length > 0 || wasQuoted) endRow();
+
+      return rows;
+    }
+
+    /* ======================================================
+       CARTES
+       ====================================================== */
+    clearInputBtn.addEventListener('click', () => {
+      if (confirm('Voulez-vous effacer le contenu actuel ?')) {
+        csvInput.value = '';
+        checkedFiles.clear();
+        if (treeRoot) refreshCheckStates();
+        cards = [];
+      }
+    });
+
     function shuffleArray(array) {
       for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -725,23 +1178,19 @@
       showToast('Cartes mélangées ! 🔀');
     }
 
-    function parseCards() {
-      // Retire un éventuel BOM UTF-8 en début de fichier
-      const text = csvInput.value.replace(/^\uFEFF/, '').trim();
+    function startFromText() {
+      const text = csvInput.value.trim();
       if (!text) return alert('Veuillez coller des données ou sélectionner un fichier.');
 
       const delim = detectDelimiter(text);
-      const lines = text.split(/\r?\n/);
+      const rows = parseCSV(text, delim);
       cards = [];
 
-      for (let line of lines) {
-        if (!line.trim()) continue;
-        const parts = line.split(delim);
-        if (parts.length >= 2) {
-          const front = parts[0].trim();
-          const back = parts.slice(1).join(delim).trim();
-          cards.push({ front, back });
-        }
+      for (const parts of rows) {
+        if (parts.length < 2) continue;
+        const front = parts[0];
+        const back = parts.slice(1).join(delim === '\t' ? ' ' : delim + ' ').trim();
+        if (front && back) cards.push({ front, back });
       }
 
       if (cards.length === 0) {
@@ -764,6 +1213,11 @@
       rectoText.innerText = card.front;
       versoText.innerText = card.back;
       counter.innerText = `Carte ${currentIndex + 1} / ${cards.length}`;
+
+      // Barre de progression
+      const pct = cards.length > 0 ? ((currentIndex + 1) / cards.length) * 100 : 0;
+      progressFill.style.width = pct + '%';
+      progressTrack.setAttribute('aria-valuenow', Math.round(pct));
 
       prevBtn.disabled = currentIndex === 0;
       nextBtn.disabled = currentIndex === cards.length - 1;
@@ -788,7 +1242,7 @@
       }
     }
 
-    startBtn.addEventListener('click', parseCards);
+    startBtn.addEventListener('click', startFromText);
     shuffleBtn.addEventListener('click', shuffleCurrentDeck);
 
     editBtn.addEventListener('click', () => {
@@ -796,12 +1250,73 @@
       setupView.style.display = 'flex';
     });
 
-    document.getElementById('card-scene').addEventListener('click', toggleFlip);
     flipBtn.addEventListener('click', toggleFlip);
     nextBtn.addEventListener('click', nextCard);
     prevBtn.addEventListener('click', prevCard);
 
-    // Navigation Clavier
+    /* ======================================================
+       GESTES TACTILES (swipe)
+       - gauche/droite : navigation
+       - haut/bas : retourner
+       - simple tap : retourner
+       ====================================================== */
+    const SWIPE_MIN = 40;      // distance minimale (px)
+    const TAP_MAX = 10;        // déplacement max pour un "tap"
+    let touchStart = null;
+    let swipeHandled = false;
+
+    cardScene.addEventListener('touchstart', (e) => {
+      if (e.touches.length !== 1) { touchStart = null; return; }
+      const t = e.touches[0];
+      touchStart = { x: t.clientX, y: t.clientY, time: Date.now() };
+    }, { passive: true });
+
+    cardScene.addEventListener('touchmove', (e) => {
+      if (!touchStart) return;
+      const t = e.touches[0];
+      const dx = Math.abs(t.clientX - touchStart.x);
+      const dy = Math.abs(t.clientY - touchStart.y);
+      // Empêche le scroll de la page pendant un swipe vertical franc
+      if (dy > dx && dy > 15 && e.cancelable) e.preventDefault();
+    }, { passive: false });
+
+    cardScene.addEventListener('touchend', (e) => {
+      if (!touchStart) return;
+      const t = e.changedTouches[0];
+      const dx = t.clientX - touchStart.x;
+      const dy = t.clientY - touchStart.y;
+      const absX = Math.abs(dx);
+      const absY = Math.abs(dy);
+      touchStart = null;
+
+      if (absX < TAP_MAX && absY < TAP_MAX) {
+        // Tap : géré ici pour éviter le double déclenchement avec "click"
+        swipeHandled = true;
+        toggleFlip();
+        return;
+      }
+
+      if (Math.max(absX, absY) < SWIPE_MIN) return;
+
+      swipeHandled = true;
+      if (absX > absY) {
+        dx < 0 ? nextCard() : prevCard();
+      } else {
+        toggleFlip();
+      }
+    }, { passive: true });
+
+    cardScene.addEventListener('touchcancel', () => { touchStart = null; }, { passive: true });
+
+    // Clic souris (ignoré si le toucher vient d'être traité)
+    cardScene.addEventListener('click', () => {
+      if (swipeHandled) { swipeHandled = false; return; }
+      toggleFlip();
+    });
+
+    /* ======================================================
+       CLAVIER
+       ====================================================== */
     window.addEventListener('keydown', (e) => {
       const tag = document.activeElement && document.activeElement.tagName;
       if (tag === 'TEXTAREA' || tag === 'INPUT' || tag === 'SELECT') return;
