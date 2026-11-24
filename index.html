@@ -3,414 +3,434 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Flashcards</title>
-  <style>
-    :root {
-      --bg: #f8fafc;
-      --card-bg: #ffffff;
-      --text: #0f172a;
-      --text-muted: #64748b;
-      --border: #cbd5e1;
-      --btn-bg: #e2eaf4;
-      --btn-text: #1e293b;
-      --btn-hover: #d0deee;
-      --accent: #0284c7;
-      --accent-hover: #0369a1;
-      --accent-text: #ffffff;
-      --badge-bg: #e2e8f0;
-      --badge-text: #475569;
-      --kbd-bg: #ffffff;
-    }
-
-    body.dark {
-      --bg: #0f172a;
-      --card-bg: #1e293b;
-      --text: #f8fafc;
-      --text-muted: #94a3b8;
-      --border: #334155;
-      --btn-bg: #334155;
-      --btn-text: #f1f5f9;
-      --btn-hover: #475569;
-      --accent: #38bdf8;
-      --accent-hover: #0284c7;
-      --accent-text: #0f172a;
-      --badge-bg: #334155;
-      --badge-text: #cbd5e1;
-      --kbd-bg: #1e293b;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      user-select: none;
-      -webkit-user-select: none;
-    }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background-color: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 1rem;
-      transition: background-color 0.2s, color 0.2s;
-    }
-
-    .app-container {
-      width: 100%;
-      max-width: 440px;
-      display: flex;
-      flex-direction: column;
-      gap: 1.25rem;
-    }
-
-    /* Bouton Thème Sombre / Clair */
-    .header-row {
-      display: flex;
-      justify-content: flex-end;
-      width: 100%;
-    }
-
-    .theme-toggle {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 50%;
-      width: 42px;
-      height: 42px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.25rem;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-      transition: transform 0.15s ease;
-    }
-
-    .theme-toggle:active {
-      transform: scale(0.92);
-    }
-
-    /* =========================================================
-       SOLUTION 1 : CSS GRID POUR CENTRAGE PARFAIT DU COMPTEUR
-       ========================================================= */
-    .top-controls {
-      display: grid;
-      /* Les colonnes 1 et 3 ont rigoureusement la même fraction (1fr),
-         ce qui positionne la colonne centrale (auto) au centre mathématique */
-      grid-template-columns: 1fr auto 1fr;
-      align-items: center;
-      gap: 0.5rem;
-      width: 100%;
-    }
-
-    .top-controls .btn-left {
-      justify-self: start;
-    }
-
-    .top-controls .card-counter {
-      justify-self: center;
-      text-align: center;
-      white-space: nowrap; /* Empêche le découpage inesthétique sur 2 lignes */
-      font-weight: 700;
-      font-size: 0.95rem;
-      color: var(--text-muted);
-      padding: 0 0.25rem;
-    }
-
-    .top-controls .btn-right {
-      justify-self: end;
-    }
-    /* ========================================================= */
-
-    /* Boutons généraux */
-    .btn {
-      background-color: var(--btn-bg);
-      color: var(--btn-text);
-      border: none;
-      border-radius: 12px;
-      padding: 0.75rem 0.9rem;
-      font-size: 0.9rem;
-      font-weight: 700;
-      cursor: pointer;
-      display: inline-flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 0.25rem;
-      transition: background-color 0.15s, transform 0.1s;
-      text-align: center;
-      min-height: 48px;
-    }
-
-    .btn:hover {
-      background-color: var(--btn-hover);
-    }
-
-    .btn:active {
-      transform: scale(0.97);
-    }
-
-    /* Grande Carte Flash */
-    .card-container {
-      perspective: 1000px;
-      width: 100%;
-      height: 380px;
-    }
-
-    .card {
-      width: 100%;
-      height: 100%;
-      background: var(--card-bg);
-      border: 1.5px solid var(--border);
-      border-radius: 20px;
-      position: relative;
-      cursor: pointer;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-      display: flex;
-      flex-direction: column;
-      padding: 1.5rem;
-      transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
-    }
-
-    .card:hover {
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08);
-    }
-
-    .badge {
-      align-self: flex-start;
-      background-color: var(--badge-bg);
-      color: var(--badge-text);
-      font-size: 0.7rem;
-      font-weight: 800;
-      letter-spacing: 0.08em;
-      padding: 0.25rem 0.6rem;
-      border-radius: 6px;
-      text-transform: uppercase;
-    }
-
-    .card-content {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      font-size: 1.5rem;
-      font-weight: 800;
-      line-height: 1.35;
-      padding: 1rem;
-    }
-
-    /* Barre d'actions inférieure */
-    .bottom-controls {
-      display: grid;
-      grid-template-columns: 1fr 1.3fr 1fr;
-      gap: 0.6rem;
-      width: 100%;
-    }
-
-    .btn-action {
-      padding: 0.85rem 0.5rem;
-      font-size: 0.95rem;
-    }
-
-    .btn-flip {
-      background-color: var(--accent);
-      color: var(--accent-text);
-    }
-
-    .btn-flip:hover {
-      background-color: var(--accent-hover);
-    }
-
-    /* Raccourcis clavier */
-    .shortcuts-legend {
-      text-align: center;
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      line-height: 1.8;
-      margin-top: 0.5rem;
-    }
-
-    .kbd {
-      display: inline-block;
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      padding: 0.05rem 0.35rem;
-      font-family: monospace;
-      font-size: 0.75rem;
-      background-color: var(--kbd-bg);
-    }
-  </style>
+  <title>Live Poll - Sondage en direct</title>
+  <!-- Tailwind CSS pour le style -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- PeerJS -->
+  <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+  <!-- QRCode.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
-<body>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col items-center p-4">
 
-  <div class="app-container">
-    
-    <!-- Bouton Thème -->
-    <div class="header-row">
-      <button class="theme-toggle" id="theme-btn" aria-label="Changer de thème">🌙</button>
-    </div>
+  <!-- ================= VUE PARTICIPANT ================= -->
+  <div id="participant-view" class="hidden w-full max-w-md mx-auto my-auto">
+    <div class="bg-white rounded-2xl shadow-xl p-6 text-center border border-slate-200">
+      <div id="participant-status" class="text-sm font-semibold text-indigo-600 mb-2">Connexion en cours...</div>
 
-    <!-- Barre supérieure : Solution 1 appliquée ici -->
-    <div class="top-controls">
-      <button class="btn btn-left" id="btn-change-list">
-        <span>Changer de</span>
-        <span>liste</span>
-      </button>
+      <!-- Écran d'attente / Pause -->
+      <div id="participant-waiting" class="py-12">
+        <div class="animate-pulse text-5xl mb-4">⏳</div>
+        <h2 class="text-xl font-bold text-slate-700">En attente de la question...</h2>
+        <p class="text-slate-500 text-sm mt-2">L'animateur prépare la question ou le vote est en pause.</p>
+      </div>
 
-      <div class="card-counter" id="counter">Carte 1 / 84</div>
+      <!-- Question active -->
+      <div id="participant-poll" class="hidden text-left">
+        <h2 id="participant-question" class="text-xl font-bold text-slate-900 mb-6 text-center"></h2>
+        <div id="participant-options" class="flex flex-col gap-3"></div>
+      </div>
 
-      <button class="btn btn-right" id="btn-shuffle">
-        <span>🔀</span>
-        <span>Mélanger</span>
-      </button>
-    </div>
-
-    <!-- Carte Flashcard -->
-    <div class="card-container">
-      <div class="card" id="flashcard">
-        <span class="badge" id="card-side">RECTO</span>
-        <div class="card-content" id="card-text">What is federalism?</div>
+      <!-- Message post-vote -->
+      <div id="participant-voted" class="hidden py-8">
+        <div class="text-emerald-500 text-5xl mb-3">✓</div>
+        <h2 class="text-xl font-bold text-slate-800">Vote enregistré !</h2>
+        <p class="text-slate-500 text-sm mt-1">Regardez l'écran pour les résultats.</p>
       </div>
     </div>
+  </div>
 
-    <!-- Contrôles de navigation -->
-    <div class="bottom-controls">
-      <button class="btn btn-action" id="btn-prev">
-        <span>←</span>
-        <span>Précédent</span>
-      </button>
+  <!-- ================= VUE ANIMATEUR ================= -->
+  <div id="host-view" class="hidden w-full max-w-5xl mx-auto space-y-6">
+    <header class="flex justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+      <h1 class="text-2xl font-black text-indigo-600">⚡ LivePoll Direct</h1>
+      <div class="flex items-center gap-3">
+        <!-- Espace corrigé grâce à gap-1.5 -->
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium bg-emerald-100 text-emerald-800">
+          <span>●</span>
+          <span id="participants-count">0</span>
+          <span>participant(s) connecté(s)</span>
+        </span>
+      </div>
+    </header>
 
-      <button class="btn btn-action btn-flip" id="btn-flip">
-        <span>Retourner</span>
-        <span style="font-size: 0.75rem; font-weight: 500; opacity: 0.9;">(Espace)</span>
-      </button>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
-      <button class="btn btn-action" id="btn-next">
-        <span>Suivant →</span>
-      </button>
+      <!-- Panneau de gauche : QR Code & Partage -->
+      <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center text-center">
+        <h2 class="font-bold text-slate-700 mb-4 text-base">Rejoindre la session</h2>
+        <div id="qrcode-container" class="bg-white p-3 rounded-xl border border-slate-200 mb-4 shadow-inner min-h-[200px] flex items-center justify-center"></div>
+        <p class="text-xs text-slate-500 break-all mb-2 select-all font-mono" id="session-url"></p>
+        <button onclick="copySessionLink()" class="text-xs font-semibold text-indigo-600 hover:text-indigo-800 border border-indigo-200 px-3 py-1.5 rounded-lg bg-indigo-50">
+          Copier le lien direct
+        </button>
+      </div>
+
+      <!-- Panneau du milieu : Édition & Contrôle -->
+      <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
+        <h2 class="font-bold text-slate-700 text-base">Contrôle de la question</h2>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Question en direct</label>
+          <input id="input-question" type="text" placeholder="Ex: Avez-vous compris cette notion ?" 
+                 class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-sm">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Choix (un par ligne)</label>
+          <textarea id="input-options" rows="4" 
+                    class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-sans"
+                    placeholder="Oui&#10;Non&#10;Besoin d'explications"></textarea>
+        </div>
+
+        <div class="flex flex-col gap-2 pt-2">
+          <button id="btn-publish" onclick="publishPoll()" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition shadow shadow-indigo-100 flex items-center justify-center gap-2">
+            🚀 Lancer / Mettre à jour
+          </button>
+
+          <button id="btn-toggle" onclick="togglePause()" class="w-full py-2 bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-xl transition">
+            ⏸️ Mettre en pause
+          </button>
+
+          <button onclick="resetAnswers()" class="w-full py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl transition text-sm">
+            🔄 Réinitialiser les votes uniquement
+          </button>
+        </div>
+      </div>
+
+      <!-- Panneau de droite : Résultats en direct -->
+      <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col">
+        <div class="flex justify-between items-baseline mb-4">
+          <h2 class="font-bold text-slate-700 text-base">Résultats en direct</h2>
+          <span id="poll-status-badge" class="text-xs font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-500">Inactif</span>
+        </div>
+
+        <div id="results-display" class="flex-1 flex flex-col justify-center">
+          <p class="text-slate-400 text-center text-sm py-8 italic">Aucune question active.</p>
+        </div>
+      </div>
+
     </div>
-
-    <!-- Légende clavier -->
-    <div class="shortcuts-legend">
-      Navigation : <span class="kbd">←</span> Précédente | <span class="kbd">→</span> Suivante | <span class="kbd">↑</span> <span class="kbd">↓</span> ou <span class="kbd">Espace</span> Retourner
-    </div>
-
   </div>
 
   <script>
-    // Données de démonstration
-    let flashcards = [
-      {
-        recto: "What is federalism?",
-        verso: "A system of government where power is divided between a central national authority and regional state governments."
-      },
-      {
-        recto: "What are enumerated powers?",
-        verso: "Powers specifically granted to the federal government by the Constitution."
-      },
-      {
-        recto: "What is the 10th Amendment?",
-        verso: "Powers not given to the federal government are reserved for the states or the people."
+    const rtcConfig = {
+      iceServers: [
+        { urls: 'stun:stun.l.google.com:19302' },
+        { urls: 'stun:stun1.l.google.com:19302' },
+        { urls: 'stun:stun2.l.google.com:19302' },
+        { urls: 'stun:stun.cloudflare.com:3478' }
+      ]
+    };
+
+    let peer = null;
+    let connections = [];
+    let state = {
+      isOpen: false,
+      question: "",
+      options: [],
+      votes: [],
+      pollId: 0
+    };
+
+    let hostConn = null;
+    let currentParticipantPollId = null;
+    let hasVotedForCurrentPoll = false;
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const joinId = urlParams.get('join');
+
+    if (joinId) {
+      initParticipant(joinId);
+    } else {
+      initHost();
+    }
+
+    // ================= LOGIQUE ANIMATEUR =================
+    function initHost() {
+      document.getElementById('host-view').classList.remove('hidden');
+
+      const sessionId = 'poll-' + Math.random().toString(36).substring(2, 9);
+      peer = new Peer(sessionId, { config: rtcConfig });
+
+      peer.on('open', (id) => {
+        const fullUrl = window.location.origin + window.location.pathname + '?join=' + id;
+        document.getElementById('session-url').innerText = fullUrl;
+
+        new QRCode(document.getElementById("qrcode-container"), {
+          text: fullUrl,
+          width: 180,
+          height: 180,
+          correctLevel: QRCode.CorrectLevel.M
+        });
+      });
+
+      peer.on('connection', (conn) => {
+        connections.push(conn);
+
+        // Déclenché quand le canal WebRTC est prêt
+        const onOpen = () => {
+          updateParticipantsCount();
+          sendStateTo(conn);
+        };
+
+        if (conn.open) {
+          onOpen();
+        } else {
+          conn.on('open', onOpen);
+        }
+
+        conn.on('data', (data) => {
+          if (data.type === 'SYNC_REQUEST') {
+            sendStateTo(conn);
+          }
+
+          if (data.type === 'VOTE' && state.isOpen) {
+            if (data.pollId === state.pollId && data.optionIndex >= 0 && data.optionIndex < state.votes.length) {
+              state.votes[data.optionIndex]++;
+              renderResults();
+            }
+          }
+        });
+
+        const cleanup = () => {
+          connections = connections.filter(c => c !== conn);
+          updateParticipantsCount();
+        };
+
+        conn.on('close', cleanup);
+        conn.on('error', cleanup);
+
+        if (conn.peerConnection) {
+          conn.peerConnection.addEventListener('connectionstatechange', () => {
+            const s = conn.peerConnection.connectionState;
+            if (s === 'disconnected' || s === 'failed' || s === 'closed') {
+              cleanup();
+            }
+          });
+        }
+      });
+    }
+
+    function updateParticipantsCount() {
+      document.getElementById('participants-count').innerText = connections.filter(c => c.open).length;
+    }
+
+    function publishPoll() {
+      const q = document.getElementById('input-question').value.trim();
+      const rawOpts = document.getElementById('input-options').value.split('\n').map(o => o.trim()).filter(o => o.length > 0);
+
+      if (!q || rawOpts.length < 2) {
+        alert("Veuillez saisir une question et au moins 2 options.");
+        return;
       }
-    ];
 
-    let currentIndex = 0;
-    let isFlipped = false;
+      state.question = q;
+      state.options = rawOpts;
+      state.votes = new Array(rawOpts.length).fill(0);
+      state.isOpen = true;
+      state.pollId = Date.now();
 
-    // Éléments du DOM
-    const cardEl = document.getElementById("flashcard");
-    const cardTextEl = document.getElementById("card-text");
-    const cardSideEl = document.getElementById("card-side");
-    const counterEl = document.getElementById("counter");
-    const btnPrev = document.getElementById("btn-prev");
-    const btnNext = document.getElementById("btn-next");
-    const btnFlip = document.getElementById("btn-flip");
-    const btnShuffle = document.getElementById("btn-shuffle");
-    const btnChangeList = document.getElementById("btn-change-list");
-    const themeBtn = document.getElementById("theme-btn");
+      updateHostStatusUI();
+      renderResults();
+      broadcastState();
+    }
 
-    function renderCard() {
-      const card = flashcards[currentIndex];
-      counterEl.textContent = `Carte ${currentIndex + 1} / ${flashcards.length}`;
-      
-      if (!isFlipped) {
-        cardSideEl.textContent = "RECTO";
-        cardTextEl.textContent = card.recto;
+    function togglePause() {
+      if (state.options.length === 0) return;
+      state.isOpen = !state.isOpen;
+      updateHostStatusUI();
+      broadcastState();
+    }
+
+    function resetAnswers() {
+      if (state.options.length === 0) return;
+      state.votes = new Array(state.options.length).fill(0);
+      state.pollId = Date.now();
+      renderResults();
+      broadcastState();
+    }
+
+    function updateHostStatusUI() {
+      const badge = document.getElementById('poll-status-badge');
+      const btnToggle = document.getElementById('btn-toggle');
+
+      if (!state.question) {
+        badge.innerText = "Inactif";
+        badge.className = "text-xs font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-500";
+        btnToggle.innerText = "⏸️ Mettre en pause";
+      } else if (state.isOpen) {
+        badge.innerText = "En cours";
+        badge.className = "text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700";
+        btnToggle.innerText = "⏸️ Mettre en pause";
+        btnToggle.className = "w-full py-2 bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-xl transition";
       } else {
-        cardSideEl.textContent = "VERSO";
-        cardTextEl.textContent = card.verso;
+        badge.innerText = "En pause";
+        badge.className = "text-xs font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700";
+        btnToggle.innerText = "▶️ Reprendre les réponses";
+        btnToggle.className = "w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl transition";
       }
     }
 
-    function toggleFlip() {
-      isFlipped = !isFlipped;
-      renderCard();
+    function broadcastState() {
+      connections.forEach(conn => sendStateTo(conn));
     }
 
-    function prevCard() {
-      if (currentIndex > 0) {
-        currentIndex--;
-      } else {
-        currentIndex = flashcards.length - 1; // boucle
+    function sendStateTo(conn) {
+      if (conn && conn.open) {
+        conn.send({
+          type: 'STATE',
+          isOpen: state.isOpen,
+          question: state.question,
+          options: state.options,
+          pollId: state.pollId
+        });
       }
-      isFlipped = false;
-      renderCard();
     }
 
-    function nextCard() {
-      if (currentIndex < flashcards.length - 1) {
-        currentIndex++;
-      } else {
-        currentIndex = 0; // boucle
+    function renderResults() {
+      const container = document.getElementById('results-display');
+      if (state.options.length === 0) {
+        container.innerHTML = '<p class="text-slate-400 text-center text-sm py-8 italic">Aucune question active.</p>';
+        return;
       }
-      isFlipped = false;
-      renderCard();
+
+      const totalVotes = state.votes.reduce((a, b) => a + b, 0);
+
+      let html = `<div class="mb-4"><h3 class="font-extrabold text-slate-800 text-lg">${state.question}</h3><p class="text-xs text-slate-400">${totalVotes} réponse(s) reçue(s)</p></div>`;
+      html += '<div class="space-y-3">';
+
+      state.options.forEach((opt, idx) => {
+        const count = state.votes[idx];
+        const pct = totalVotes > 0 ? Math.round((count / totalVotes) * 100) : 0;
+
+        html += `
+          <div>
+            <div class="flex justify-between text-sm font-semibold mb-1">
+              <span class="text-slate-700">${opt}</span>
+              <span class="text-slate-500">${count} (${pct}%)</span>
+            </div>
+            <div class="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
+              <div class="bg-indigo-600 h-3 rounded-full transition-all duration-300" style="width: ${pct}%"></div>
+            </div>
+          </div>
+        `;
+      });
+
+      html += '</div>';
+      container.innerHTML = html;
     }
 
-    function shuffleCards() {
-      for (let i = flashcards.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [flashcards[i], flashcards[j]] = [flashcards[j], flashcards[i]];
-      }
-      currentIndex = 0;
-      isFlipped = false;
-      renderCard();
+    function copySessionLink() {
+      const url = document.getElementById('session-url').innerText;
+      navigator.clipboard.writeText(url);
+      alert("Lien copié !");
     }
 
-    // Gestion des clics
-    cardEl.addEventListener("click", toggleFlip);
-    btnFlip.addEventListener("click", toggleFlip);
-    btnPrev.addEventListener("click", prevCard);
-    btnNext.addEventListener("click", nextCard);
-    btnShuffle.addEventListener("click", shuffleCards);
-    btnChangeList.addEventListener("click", () => {
-      alert("Sélecteur de liste (à lier avec vos différentes banques de cartes).");
-    });
+    // ================= LOGIQUE PARTICIPANT =================
+    function initParticipant(targetHostId) {
+      document.getElementById('participant-view').classList.remove('hidden');
+      const statusEl = document.getElementById('participant-status');
 
-    // Raccourcis clavier
-    window.addEventListener("keydown", (e) => {
-      if (e.code === "Space" || e.code === "ArrowUp" || e.code === "ArrowDown") {
-        e.preventDefault();
-        toggleFlip();
-      } else if (e.code === "ArrowLeft") {
-        prevCard();
-      } else if (e.code === "ArrowRight") {
-        nextCard();
+      peer = new Peer({ config: rtcConfig });
+
+      peer.on('open', () => {
+        statusEl.innerText = "Connexion à l'animateur...";
+        hostConn = peer.connect(targetHostId, { reliable: true });
+
+        const setupConnection = () => {
+          statusEl.innerText = "Connecté ✓";
+          statusEl.className = "text-sm font-semibold text-emerald-600 mb-2";
+          hostConn.send({ type: 'SYNC_REQUEST' });
+        };
+
+        if (hostConn.open) {
+          setupConnection();
+        } else {
+          hostConn.on('open', setupConnection);
+        }
+
+        hostConn.on('data', (data) => {
+          if (data.type === 'STATE') {
+            handleIncomingState(data);
+          }
+        });
+
+        hostConn.on('close', () => {
+          statusEl.innerText = "Déconnecté de la session";
+          statusEl.className = "text-sm font-semibold text-rose-500 mb-2";
+          showWaitingScreen();
+        });
+
+        hostConn.on('error', () => {
+          statusEl.innerText = "Erreur de connexion";
+          statusEl.className = "text-sm font-semibold text-rose-500 mb-2";
+        });
+      });
+
+      peer.on('error', (err) => {
+        statusEl.innerText = "Impossible de joindre le réseau P2P.";
+        statusEl.className = "text-sm font-semibold text-rose-500 mb-2";
+      });
+    }
+
+    function showWaitingScreen() {
+      document.getElementById('participant-waiting').classList.remove('hidden');
+      document.getElementById('participant-poll').classList.add('hidden');
+      document.getElementById('participant-voted').classList.add('hidden');
+    }
+
+    function handleIncomingState(data) {
+      const waitingEl = document.getElementById('participant-waiting');
+      const pollEl = document.getElementById('participant-poll');
+      const votedEl = document.getElementById('participant-voted');
+
+      if (data.pollId !== currentParticipantPollId) {
+        currentParticipantPollId = data.pollId;
+        hasVotedForCurrentPoll = false;
       }
-    });
 
-    // Thème Sombre / Clair
-    themeBtn.addEventListener("click", () => {
-      document.body.classList.toggle("dark");
-      themeBtn.textContent = document.body.classList.contains("dark") ? "☀️" : "🌙";
-    });
+      if (!data.isOpen || !data.options || data.options.length === 0) {
+        showWaitingScreen();
+        return;
+      }
 
-    // Initialisation
-    renderCard();
+      if (hasVotedForCurrentPoll) {
+        waitingEl.classList.add('hidden');
+        pollEl.classList.add('hidden');
+        votedEl.classList.remove('hidden');
+        return;
+      }
+
+      waitingEl.classList.add('hidden');
+      votedEl.classList.add('hidden');
+      pollEl.classList.remove('hidden');
+
+      document.getElementById('participant-question').innerText = data.question;
+      const optsContainer = document.getElementById('participant-options');
+      optsContainer.innerHTML = "";
+
+      data.options.forEach((opt, idx) => {
+        const btn = document.createElement('button');
+        btn.innerText = opt;
+        btn.className = "w-full py-4 px-5 text-left font-bold text-slate-800 bg-slate-50 hover:bg-indigo-50 border-2 border-slate-200 hover:border-indigo-500 rounded-xl transition text-base active:scale-95";
+        btn.onclick = () => submitVote(idx);
+        optsContainer.appendChild(btn);
+      });
+    }
+
+    function submitVote(idx) {
+      if (!hostConn || hasVotedForCurrentPoll) return;
+      hasVotedForCurrentPoll = true;
+      hostConn.send({
+        type: 'VOTE',
+        optionIndex: idx,
+        pollId: currentParticipantPollId
+      });
+
+      document.getElementById('participant-poll').classList.add('hidden');
+      document.getElementById('participant-voted').classList.remove('hidden');
+    }
   </script>
 </body>
 </html>
