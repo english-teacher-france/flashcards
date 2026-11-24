@@ -1,457 +1,680 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Live Poll - Sondage en direct</title>
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- PeerJS -->
-  <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
-  <!-- QRCode.js -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <title>Flashcards de Classe</title>
+  <style>
+    /* Variables de thèmes */
+    :root[data-theme="dark"] {
+      --bg: #0f172a;
+      --card-front: #1e293b;
+      --card-back: #334155;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --input-bg: #020617;
+      --accent: #38bdf8;
+      --accent-hover: #0284c7;
+      --danger: #f43f5e;
+      --danger-hover: #e11d48;
+      --border: #475569;
+      --box-bg: rgba(30, 41, 59, 0.5);
+      --shadow: rgba(0, 0, 0, 0.4);
+    }
+
+    :root[data-theme="light"] {
+      --bg: #f8fafc;
+      --card-front: #ffffff;
+      --card-back: #e2e8f0;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --input-bg: #ffffff;
+      --accent: #0284c7;
+      --accent-hover: #0369a1;
+      --danger: #e11d48;
+      --danger-hover: #be123c;
+      --border: #cbd5e1;
+      --box-bg: rgba(255, 255, 255, 0.8);
+      --shadow: rgba(0, 0, 0, 0.1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, sans-serif;
+      transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      position: relative;
+    }
+
+    /* Bouton thème (haut à droite) */
+    #theme-toggle {
+      position: absolute;
+      top: 1.5rem;
+      right: 1.5rem;
+      background: var(--card-front);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.5rem 0.8rem;
+      border-radius: 9999px;
+      cursor: pointer;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      box-shadow: 0 2px 5px var(--shadow);
+      z-index: 100;
+    }
+
+    #theme-toggle:hover {
+      border-color: var(--accent);
+    }
+
+    /* Notification (Toast) */
+    #toast {
+      position: fixed;
+      top: 20px;
+      background: var(--accent);
+      color: #ffffff;
+      padding: 0.65rem 1.25rem;
+      border-radius: 9999px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      box-shadow: 0 4px 15px var(--shadow);
+      opacity: 0;
+      transform: translateY(-20px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      pointer-events: none;
+      z-index: 1000;
+    }
+
+    #toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Configuration */
+    #setup-view {
+      width: 100%;
+      max-width: 650px;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      margin-top: 2rem;
+    }
+
+    .setup-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .preset-box {
+      background: var(--box-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    label {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    textarea {
+      width: 100%;
+      height: 200px;
+      background-color: var(--input-bg);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.75rem;
+      font-family: monospace;
+      font-size: 0.95rem;
+      resize: vertical;
+    }
+
+    textarea:focus, select:focus {
+      outline: 2px solid var(--accent);
+    }
+
+    .controls-row {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    select {
+      background-color: var(--input-bg);
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.75rem;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      cursor: pointer;
+    }
+
+    button {
+      background-color: var(--accent);
+      color: #ffffff;
+      border: none;
+      padding: 0.65rem 1.25rem;
+      font-size: 1rem;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.2s, transform 0.1s;
+    }
+
+    button:hover {
+      background-color: var(--accent-hover);
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    button:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    button.secondary {
+      background-color: var(--card-back);
+      color: var(--text);
+    }
+
+    button.secondary:hover {
+      background-color: var(--border);
+    }
+
+    button.danger {
+      background-color: transparent;
+      color: var(--danger);
+      border: 1px solid var(--danger);
+      padding: 0.4rem 0.8rem;
+      font-size: 0.85rem;
+    }
+
+    button.danger:hover {
+      background-color: var(--danger);
+      color: #ffffff;
+    }
+
+    /* Vue Flashcards */
+    #app-view {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.5rem;
+      width: 100%;
+      max-width: 650px;
+      margin-top: 2rem;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+    }
+
+    .counter {
+      font-size: 1.1rem;
+      font-weight: bold;
+      color: var(--text-muted);
+    }
+
+    /* Scène 3D */
+    .scene {
+      width: 100%;
+      height: 360px;
+      perspective: 1000px;
+      cursor: pointer;
+    }
+
+    .card {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+      box-shadow: 0 10px 25px var(--shadow);
+      border-radius: 12px;
+    }
+
+    .card.is-flipped {
+      transform: rotateX(180deg);
+    }
+
+    .card-face {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 2.5rem;
+      text-align: center;
+      border-radius: 12px;
+      border: 2px solid var(--border);
+    }
+
+    .card-front {
+      background-color: var(--card-front);
+    }
+
+    .card-back {
+      background-color: var(--card-back);
+      transform: rotateX(180deg);
+    }
+
+    .card-text {
+      font-size: 1.75rem;
+      font-weight: 600;
+      line-height: 1.4;
+      word-break: break-word;
+    }
+
+    .face-badge {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      background: rgba(0, 0, 0, 0.15);
+      padding: 4px 10px;
+      border-radius: 4px;
+      color: var(--text-muted);
+    }
+
+    .card-nav {
+      display: flex;
+      gap: 1rem;
+      width: 100%;
+      justify-content: center;
+    }
+
+    .nav-btn {
+      flex: 1;
+      padding: 0.75rem;
+    }
+
+    .help-hint {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    kbd {
+      background: var(--card-front);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 2px 6px;
+      font-size: 0.8rem;
+    }
+  </style>
 </head>
-<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col items-center p-4">
+<body>
 
-  <!-- ================= VUE PARTICIPANT ================= -->
-  <div id="participant-view" class="hidden w-full max-w-md mx-auto my-auto">
-    <div class="bg-white rounded-2xl shadow-xl p-6 text-center border border-slate-200">
-      <div id="participant-status" class="text-sm font-semibold text-indigo-600 mb-2">Connexion en cours...</div>
-      
-      <!-- Écran d'attente / Pause -->
-      <div id="participant-waiting" class="py-12">
-        <div class="animate-pulse text-5xl mb-4">⏳</div>
-        <h2 class="text-xl font-bold text-slate-700">En attente de la question...</h2>
-        <p class="text-slate-500 text-sm mt-2">L'animateur prépare la question ou le vote est en pause.</p>
+  <!-- Bouton Thème -->
+  <button id="theme-toggle" title="Basculer le thème">
+    <span id="theme-icon">☀️</span>
+  </button>
+
+  <div id="toast">Cartes mélangées !</div>
+
+  <!-- ÉCRAN CONFIGURATION -->
+  <div id="setup-view">
+    <div class="setup-header">
+      <h2>Flashcards</h2>
+      <button id="clear-input-btn" class="danger">Tout effacer</button>
+    </div>
+
+    <!-- Menus des decks préexistants -->
+    <div class="preset-box">
+      <label for="github-deck-select">Sélectionner un fichier préexistant (Dépôt GitHub) :</label>
+      <select id="github-deck-select">
+        <option value="">Recherche des fichiers...</option>
+      </select>
+    </div>
+
+    <div>
+      <label for="csv-input">Ou collez votre liste CSV / texte ci-dessous :</label>
+      <textarea id="csv-input" placeholder="Question 1 ; Réponse 1&#10;Question 2 ; Réponse 2&#10;Question 3 ; Réponse 3"></textarea>
+    </div>
+
+    <div class="controls-row">
+      <div>
+        <label for="delimiter">Séparateur : </label>
+        <select id="delimiter">
+          <option value="auto">Détection automatique</option>
+          <option value=";">Point-virgule ( ; )</option>
+          <option value="/">Slash ( / )</option>
+          <option value=",">Virgule ( , )</option>
+          <option value="\t">Tabulation</option>
+        </select>
       </div>
 
-      <!-- Question active -->
-      <div id="participant-poll" class="hidden text-left">
-        <h2 id="participant-question" class="text-xl font-bold text-slate-900 mb-6 text-center"></h2>
-        <div id="participant-options" class="flex flex-col gap-3"></div>
-      </div>
-
-      <!-- Message post-vote -->
-      <div id="participant-voted" class="hidden py-8">
-        <div class="text-emerald-500 text-5xl mb-3">✓</div>
-        <h2 class="text-xl font-bold text-slate-800">Vote enregistré !</h2>
-        <p class="text-slate-500 text-sm mt-1">Votre réponse a bien été prise en compte.</p>
+      <div style="margin-left: auto; display: flex; gap: 0.5rem;">
+        <button id="start-btn">Démarrer</button>
       </div>
     </div>
   </div>
 
-  <!-- ================= VUE ANIMATEUR ================= -->
-  <div id="host-view" class="hidden w-full max-w-5xl mx-auto space-y-6">
-    <header class="flex justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-      <h1 class="text-2xl font-black text-indigo-600">⚡ LivePoll Direct</h1>
-      <div class="flex items-center gap-3">
-        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-emerald-100 text-emerald-800">
-          ● <span id="participants-count" class="ml-1">0</span> participant(s) connecté(s)
-        </span>
-      </div>
-    </header>
+  <!-- ÉCRAN FLASHCARDS -->
+  <div id="app-view">
+    <div class="top-bar">
+      <button id="edit-btn" class="secondary" title="Vider et changer de liste">Changer de liste</button>
+      <span class="counter" id="counter">Carte 0 / 0</span>
+      <button id="shuffle-btn" class="secondary" title="Mélanger l'ordre des cartes">🔀 Mélanger</button>
+    </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-      
-      <!-- Panneau de gauche : QR Code & Partage -->
-      <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center text-center">
-        <h2 class="font-bold text-slate-700 mb-4 text-base">Rejoindre la session</h2>
-        <div id="qrcode-container" class="bg-white p-3 rounded-xl border border-slate-200 mb-4 shadow-inner min-h-[200px] flex items-center justify-center"></div>
-        <p class="text-xs text-slate-500 break-all mb-2 select-all font-mono" id="session-url"></p>
-        <button onclick="copySessionLink()" class="text-xs font-semibold text-indigo-600 hover:text-indigo-800 border border-indigo-200 px-3 py-1.5 rounded-lg bg-indigo-50">
-          Copier le lien direct
-        </button>
-      </div>
-
-      <!-- Panneau du milieu : Édition & Contrôle -->
-      <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
-        <h2 class="font-bold text-slate-700 text-base">Contrôle de la question</h2>
-        
-        <div>
-          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Question en direct</label>
-          <input id="input-question" type="text" placeholder="Ex: Avez-vous compris cette notion ?" 
-                 class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-sm">
+    <div class="scene" id="card-scene">
+      <div class="card" id="card">
+        <div class="card-face card-front">
+          <div class="face-badge">Recto</div>
+          <div class="card-text" id="recto-text"></div>
         </div>
-
-        <div>
-          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Choix (un par ligne)</label>
-          <textarea id="input-options" rows="4" 
-                    class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-sans"
-                    placeholder="Oui&#10;Non&#10;Besoin d'explications"></textarea>
-        </div>
-
-        <div class="flex flex-col gap-2 pt-2">
-          <button id="btn-publish" onclick="publishPoll()" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition shadow shadow-indigo-100 flex items-center justify-center gap-2">
-            🚀 Lancer / Mettre à jour
-          </button>
-          
-          <button id="btn-toggle" onclick="togglePause()" class="w-full py-2 bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-xl transition">
-            ⏸️ Mettre en pause
-          </button>
-          
-          <button onclick="resetAnswers()" class="w-full py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl transition text-sm">
-            🔄 Réinitialiser les votes uniquement
-          </button>
+        <div class="card-face card-back">
+          <div class="face-badge">Verso</div>
+          <div class="card-text" id="verso-text"></div>
         </div>
       </div>
+    </div>
 
-      <!-- Panneau de droite : Résultats en direct -->
-      <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col">
-        <div class="flex justify-between items-baseline mb-4">
-          <h2 class="font-bold text-slate-700 text-base">Résultats en direct</h2>
-          <span id="poll-status-badge" class="text-xs font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-500">Inactif</span>
-        </div>
+    <div class="card-nav">
+      <button id="prev-btn" class="secondary nav-btn">← Précédent</button>
+      <button id="flip-btn" class="nav-btn">Retourner (Espace)</button>
+      <button id="next-btn" class="secondary nav-btn">Suivant →</button>
+    </div>
 
-        <div id="results-display" class="flex-1 flex flex-col justify-center">
-          <p class="text-slate-400 text-center text-sm py-8 italic">Aucune question active.</p>
-        </div>
-      </div>
-
+    <div class="help-hint">
+      Navigation : <kbd>←</kbd> Précédente | <kbd>→</kbd> Suivante | <kbd>↑</kbd> <kbd>↓</kbd> ou <kbd>Espace</kbd> Retourner
     </div>
   </div>
 
   <script>
-    const rtcConfig = {
-      iceServers: [
-        { urls: 'stun:stun.l.google.com:19302' },
-        { urls: 'stun:stun1.l.google.com:19302' },
-        { urls: 'stun:stun2.l.google.com:19302' },
-        { urls: 'stun:stun.cloudflare.com:3478' }
-      ]
-    };
+    // Configuration GitHub facultative pour les tests en local (ex: file:///)
+    const MANUAL_GITHUB_USER = ''; 
+    const MANUAL_GITHUB_REPO = ''; 
 
-    let peer = null;
-    let connections = [];
-    
-    // État côté animateur
-    let state = {
-      isOpen: false,
-      question: "",
-      options: [],
-      votes: [],
-      pollId: 0,
-      voters: new Set() // Mémorise les ID des participants ayant déjà voté pour ce pollId
-    };
+    let cards = [];
+    let currentIndex = 0;
+    let isFlipped = false;
 
-    let hostConn = null;
-    let currentParticipantPollId = null;
+    // Éléments UI
+    const setupView = document.getElementById('setup-view');
+    const appView = document.getElementById('app-view');
+    const csvInput = document.getElementById('csv-input');
+    const startBtn = document.getElementById('start-btn');
+    const editBtn = document.getElementById('edit-btn');
+    const clearInputBtn = document.getElementById('clear-input-btn');
+    const cardElement = document.getElementById('card');
+    const rectoText = document.getElementById('recto-text');
+    const versoText = document.getElementById('verso-text');
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
+    const flipBtn = document.getElementById('flip-btn');
+    const shuffleBtn = document.getElementById('shuffle-btn');
+    const counter = document.getElementById('counter');
+    const delimiterSelect = document.getElementById('delimiter');
+    const githubSelect = document.getElementById('github-deck-select');
+    const toast = document.getElementById('toast');
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    const themeIcon = document.getElementById('theme-icon');
 
-    // Récupération ou création d'un Voter ID permanent pour le participant
-    function getVoterId() {
-      let id = localStorage.getItem('poll_voter_id');
-      if (!id) {
-        id = 'voter_' + Math.random().toString(36).substring(2, 11);
-        localStorage.setItem('poll_voter_id', id);
+    /* --- GESTION DU THÈME --- */
+    function initTheme() {
+      const savedTheme = localStorage.getItem('fc_theme') || 'dark';
+      setTheme(savedTheme);
+    }
+
+    function setTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      localStorage.setItem('fc_theme', theme);
+      themeIcon.textContent = theme === 'dark' ? '☀️' : '🌙';
+    }
+
+    themeToggleBtn.addEventListener('click', () => {
+      const current = document.documentElement.getAttribute('data-theme');
+      setTheme(current === 'dark' ? 'light' : 'dark');
+    });
+
+    initTheme();
+
+    /* --- NOTIFICATION (TOAST) --- */
+    let toastTimeout;
+    function showToast(message) {
+      toast.innerText = message;
+      toast.classList.add('show');
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2000);
+    }
+
+    /* --- LECTURE DU DOSSIER DECKS GITHUB --- */
+    async function loadGitHubDecks() {
+      let user = MANUAL_GITHUB_USER;
+      let repo = MANUAL_GITHUB_REPO;
+
+      if (!user || !repo) {
+        const host = window.location.hostname;
+        const pathParts = window.location.pathname.split('/').filter(Boolean);
+        if (host.endsWith('.github.io') && pathParts.length > 0) {
+          user = host.replace('.github.io', '');
+          repo = pathParts[0];
+        }
       }
-      return id;
-    }
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const joinId = urlParams.get('join');
+      if (!user || !repo) {
+        githubSelect.innerHTML = '<option value="">(Détection active sur GitHub Pages)</option>';
+        githubSelect.disabled = true;
+        return;
+      }
 
-    if (joinId) {
-      initParticipant(joinId);
-    } else {
-      initHost();
-    }
+      try {
+        const apiUrl = `https://api.github.com/repos/${user}/${repo}/contents/decks`;
+        const res = await fetch(apiUrl);
 
-    // ================= LOGIQUE ANIMATEUR =================
-    function initHost() {
-      document.getElementById('host-view').classList.remove('hidden');
-
-      const sessionId = 'poll-' + Math.random().toString(36).substring(2, 9);
-      peer = new Peer(sessionId, { config: rtcConfig });
-
-      peer.on('open', (id) => {
-        const fullUrl = window.location.origin + window.location.pathname + '?join=' + id;
-        document.getElementById('session-url').innerText = fullUrl;
-
-        new QRCode(document.getElementById("qrcode-container"), {
-          text: fullUrl,
-          width: 180,
-          height: 180,
-          correctLevel: QRCode.CorrectLevel.M
-        });
-      });
-
-      peer.on('connection', (conn) => {
-        connections.push(conn);
-        updateParticipantsCount();
-
-        const syncState = () => {
-          sendStateTo(conn);
-        };
-
-        if (conn.open) {
-          syncState();
-        } else {
-          conn.on('open', syncState);
+        if (!res.ok) {
+          githubSelect.innerHTML = '<option value="">(Dossier /decks non trouvé sur le dépôt)</option>';
+          githubSelect.disabled = true;
+          return;
         }
 
-        conn.on('data', (data) => {
-          if (data.type === 'SYNC_REQUEST') {
-            sendStateTo(conn);
-          }
+        const files = await res.json();
+        const csvFiles = files.filter(f => f.name.toLowerCase().endsWith('.csv'));
 
-          // Validation anti-triche du vote
-          if (data.type === 'VOTE' && state.isOpen) {
-            // Vérifie que le vote correspond à la question courante
-            if (data.pollId === state.pollId) {
-              // Vérifie si le participant a déjà voté
-              if (!state.voters.has(data.voterId)) {
-                if (data.optionIndex >= 0 && data.optionIndex < state.votes.length) {
-                  state.voters.add(data.voterId); // Enregistre le participant
-                  state.votes[data.optionIndex]++;
-                  renderResults();
-                }
-              }
-            }
-          }
-        });
-
-        conn.on('close', () => {
-          connections = connections.filter(c => c !== conn);
-          updateParticipantsCount();
-        });
-
-        conn.on('error', () => {
-          connections = connections.filter(c => c !== conn);
-          updateParticipantsCount();
-        });
-      });
-    }
-
-    function updateParticipantsCount() {
-      document.getElementById('participants-count').innerText = connections.filter(c => c.open).length;
-    }
-
-    function publishPoll() {
-      const q = document.getElementById('input-question').value.trim();
-      const rawOpts = document.getElementById('input-options').value.split('\n').map(o => o.trim()).filter(o => o.length > 0);
-
-      if (!q || rawOpts.length < 2) {
-        alert("Veuillez saisir une question et au moins 2 options.");
-        return;
-      }
-
-      state.question = q;
-      state.options = rawOpts;
-      state.votes = new Array(rawOpts.length).fill(0);
-      state.isOpen = true;
-      state.pollId = Date.now();
-      state.voters.clear(); // Nouveau tour de vote -> remise à zéro de la liste des votants
-
-      updateHostStatusUI();
-      renderResults();
-      broadcastState();
-    }
-
-    function togglePause() {
-      if (state.options.length === 0) return;
-      state.isOpen = !state.isOpen;
-      updateHostStatusUI();
-      broadcastState();
-    }
-
-    function resetAnswers() {
-      if (state.options.length === 0) return;
-      state.votes = new Array(state.options.length).fill(0);
-      state.pollId = Date.now(); // Nouvel ID : autorise tout le monde à voter une nouvelle fois
-      state.voters.clear();
-      renderResults();
-      broadcastState();
-    }
-
-    function updateHostStatusUI() {
-      const badge = document.getElementById('poll-status-badge');
-      const btnToggle = document.getElementById('btn-toggle');
-
-      if (!state.question) {
-        badge.innerText = "Inactif";
-        badge.className = "text-xs font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-500";
-        btnToggle.innerText = "⏸️ Mettre en pause";
-      } else if (state.isOpen) {
-        badge.innerText = "En cours";
-        badge.className = "text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700";
-        btnToggle.innerText = "⏸️ Mettre en pause";
-        btnToggle.className = "w-full py-2 bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-xl transition";
-      } else {
-        badge.innerText = "En pause";
-        badge.className = "text-xs font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700";
-        btnToggle.innerText = "▶️ Reprendre les réponses";
-        btnToggle.className = "w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl transition";
-      }
-    }
-
-    function broadcastState() {
-      connections.forEach(conn => sendStateTo(conn));
-    }
-
-    function sendStateTo(conn) {
-      if (conn && conn.open) {
-        conn.send({
-          type: 'STATE',
-          isOpen: state.isOpen,
-          question: state.question,
-          options: state.options,
-          pollId: state.pollId
-        });
-      }
-    }
-
-    function renderResults() {
-      const container = document.getElementById('results-display');
-      if (state.options.length === 0) {
-        container.innerHTML = '<p class="text-slate-400 text-center text-sm py-8 italic">Aucune question active.</p>';
-        return;
-      }
-
-      const totalVotes = state.votes.reduce((a, b) => a + b, 0);
-
-      let html = `<div class="mb-4"><h3 class="font-extrabold text-slate-800 text-lg">${state.question}</h3><p class="text-xs text-slate-400">${totalVotes} réponse(s) reçue(s)</p></div>`;
-      html += '<div class="space-y-3">';
-
-      state.options.forEach((opt, idx) => {
-        const count = state.votes[idx];
-        const pct = totalVotes > 0 ? Math.round((count / totalVotes) * 100) : 0;
-
-        html += `
-          <div>
-            <div class="flex justify-between text-sm font-semibold mb-1">
-              <span class="text-slate-700">${opt}</span>
-              <span class="text-slate-500">${count} (${pct}%)</span>
-            </div>
-            <div class="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
-              <div class="bg-indigo-600 h-3 rounded-full transition-all duration-300" style="width: ${pct}%"></div>
-            </div>
-          </div>
-        `;
-      });
-
-      html += '</div>';
-      container.innerHTML = html;
-    }
-
-    function copySessionLink() {
-      const url = document.getElementById('session-url').innerText;
-      navigator.clipboard.writeText(url);
-      alert("Lien copié !");
-    }
-
-    // ================= LOGIQUE PARTICIPANT =================
-    function initParticipant(targetHostId) {
-      document.getElementById('participant-view').classList.remove('hidden');
-      const statusEl = document.getElementById('participant-status');
-
-      peer = new Peer({ config: rtcConfig });
-
-      peer.on('open', () => {
-        statusEl.innerText = "Connexion à l'animateur...";
-        hostConn = peer.connect(targetHostId, { reliable: true });
-
-        const setupConnection = () => {
-          statusEl.innerText = "Connecté ✓";
-          statusEl.className = "text-sm font-semibold text-emerald-600 mb-2";
-          hostConn.send({ type: 'SYNC_REQUEST' });
-        };
-
-        if (hostConn.open) {
-          setupConnection();
-        } else {
-          hostConn.on('open', setupConnection);
+        if (csvFiles.length === 0) {
+          githubSelect.innerHTML = '<option value="">(Aucun fichier .csv trouvé dans /decks)</option>';
+          githubSelect.disabled = true;
+          return;
         }
 
-        hostConn.on('data', (data) => {
-          if (data.type === 'STATE') {
-            handleIncomingState(data);
-          }
+        githubSelect.innerHTML = '<option value="">-- Choisir une liste existante --</option>';
+        csvFiles.forEach(file => {
+          const opt = document.createElement('option');
+          opt.value = file.download_url;
+          opt.textContent = file.name.replace(/\.[^/.]+$/, "");
+          githubSelect.appendChild(opt);
         });
 
-        hostConn.on('close', () => {
-          statusEl.innerText = "Déconnecté de la session";
-          statusEl.className = "text-sm font-semibold text-rose-500 mb-2";
-          showWaitingScreen();
-        });
-
-        hostConn.on('error', () => {
-          statusEl.innerText = "Erreur de connexion";
-          statusEl.className = "text-sm font-semibold text-rose-500 mb-2";
-        });
-      });
-
-      peer.on('error', () => {
-        statusEl.innerText = "Impossible de joindre le réseau P2P.";
-        statusEl.className = "text-sm font-semibold text-rose-500 mb-2";
-      });
+      } catch (err) {
+        console.error(err);
+        githubSelect.innerHTML = '<option value="">(Impossible de charger les fichiers)</option>';
+        githubSelect.disabled = true;
+      }
     }
 
-    function showWaitingScreen() {
-      document.getElementById('participant-waiting').classList.remove('hidden');
-      document.getElementById('participant-poll').classList.add('hidden');
-      document.getElementById('participant-voted').classList.add('hidden');
+    githubSelect.addEventListener('change', async () => {
+      const url = githubSelect.value;
+      if (!url) return;
+
+      csvInput.value = "Chargement en cours...";
+      try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error();
+        const text = await res.text();
+        csvInput.value = text;
+      } catch (e) {
+        alert("Erreur lors du téléchargement du fichier.");
+        csvInput.value = "";
+      }
+    });
+
+    loadGitHubDecks();
+
+    /* --- FONCTIONS MÉMOIRE ET CARTES --- */
+    clearInputBtn.addEventListener('click', () => {
+      if (confirm("Voulez-vous effacer le contenu actuel ?")) {
+        csvInput.value = "";
+        githubSelect.value = "";
+        cards = [];
+      }
+    });
+
+    function detectDelimiter(text) {
+      if (delimiterSelect.value !== 'auto') {
+        return delimiterSelect.value === '\\t' ? '\t' : delimiterSelect.value;
+      }
+      const firstLine = text.split('\n').find(l => l.trim().length > 0) || '';
+      const counts = {
+        ';': (firstLine.match(/;/g) || []).length,
+        '/': (firstLine.match(/\//g) || []).length,
+        ',': (firstLine.match(/,/g) || []).length,
+        '\t': (firstLine.match(/\t/g) || []).length
+      };
+      return Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b);
     }
 
-    function handleIncomingState(data) {
-      const waitingEl = document.getElementById('participant-waiting');
-      const pollEl = document.getElementById('participant-poll');
-      const votedEl = document.getElementById('participant-voted');
+    // Mélange de Fisher-Yates
+    function shuffleArray(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+    }
 
-      currentParticipantPollId = data.pollId;
+    function shuffleCurrentDeck() {
+      if (cards.length <= 1) return;
+      shuffleArray(cards);
+      currentIndex = 0;
+      showCard();
+      showToast("Cartes mélangées ! 🔀");
+    }
 
-      // Vérifie si ce participant a déjà voté pour ce pollId précis
-      const hasVoted = localStorage.getItem('voted_poll_' + data.pollId) === 'true';
+    function parseCards() {
+      const text = csvInput.value.trim();
+      if (!text) return alert("Veuillez coller des données ou sélectionner un fichier.");
 
-      // Si le sondage est fermé ou vide
-      if (!data.isOpen || !data.options || data.options.length === 0) {
-        showWaitingScreen();
-        return;
+      const delim = detectDelimiter(text);
+      const lines = text.split('\n');
+      cards = [];
+
+      for (let line of lines) {
+        if (!line.trim()) continue;
+        const parts = line.split(delim);
+        if (parts.length >= 2) {
+          const front = parts[0].trim();
+          const back = parts.slice(1).join(delim).trim();
+          cards.push({ front, back });
+        }
       }
 
-      // Si le participant a déjà voté (persistant même après actualisation)
-      if (hasVoted) {
-        waitingEl.classList.add('hidden');
-        pollEl.classList.add('hidden');
-        votedEl.classList.remove('hidden');
-        return;
+      if (cards.length === 0) {
+        return alert("Aucune carte valide trouvée. Vérifiez que votre séparateur correspond bien.");
       }
 
-      // Affichage de la question active
-      waitingEl.classList.add('hidden');
-      votedEl.classList.add('hidden');
-      pollEl.classList.remove('hidden');
-
-      document.getElementById('participant-question').innerText = data.question;
-      const optsContainer = document.getElementById('participant-options');
-      optsContainer.innerHTML = "";
-
-      data.options.forEach((opt, idx) => {
-        const btn = document.createElement('button');
-        btn.innerText = opt;
-        btn.className = "w-full py-4 px-5 text-left font-bold text-slate-800 bg-slate-50 hover:bg-indigo-50 border-2 border-slate-200 hover:border-indigo-500 rounded-xl transition text-base active:scale-95";
-        btn.onclick = () => submitVote(idx);
-        optsContainer.appendChild(btn);
-      });
+      currentIndex = 0;
+      showCard();
+      setupView.style.display = 'none';
+      appView.style.display = 'flex';
     }
 
-    function submitVote(idx) {
-      if (!hostConn) return;
+    function showCard() {
+      if (isFlipped) {
+        cardElement.classList.remove('is-flipped');
+        isFlipped = false;
+      }
 
-      const voterId = getVoterId();
+      const card = cards[currentIndex];
+      rectoText.innerText = card.front;
+      versoText.innerText = card.back;
+      counter.innerText = `Carte ${currentIndex + 1} / ${cards.length}`;
 
-      // Enregistre localement le vote pour ce sondage
-      localStorage.setItem('voted_poll_' + currentParticipantPollId, 'true');
-
-      // Envoie le vote avec l'identifiant du votant
-      hostConn.send({
-        type: 'VOTE',
-        optionIndex: idx,
-        pollId: currentParticipantPollId,
-        voterId: voterId
-      });
-
-      document.getElementById('participant-poll').classList.add('hidden');
-      document.getElementById('participant-voted').classList.remove('hidden');
+      prevBtn.disabled = currentIndex === 0;
+      nextBtn.disabled = currentIndex === cards.length - 1;
     }
+
+    function toggleFlip() {
+      isFlipped = !isFlipped;
+      cardElement.classList.toggle('is-flipped', isFlipped);
+    }
+
+    function nextCard() {
+      if (currentIndex < cards.length - 1) {
+        currentIndex++;
+        showCard();
+      }
+    }
+
+    function prevCard() {
+      if (currentIndex > 0) {
+        currentIndex--;
+        showCard();
+      }
+    }
+
+    startBtn.addEventListener('click', parseCards);
+    shuffleBtn.addEventListener('click', shuffleCurrentDeck);
+
+    editBtn.addEventListener('click', () => {
+      appView.style.display = 'none';
+      setupView.style.display = 'flex';
+    });
+
+    document.getElementById('card-scene').addEventListener('click', toggleFlip);
+    flipBtn.addEventListener('click', toggleFlip);
+    nextBtn.addEventListener('click', nextCard);
+    prevBtn.addEventListener('click', prevCard);
+
+    // Navigation Clavier
+    window.addEventListener('keydown', (e) => {
+      if (document.activeElement === csvInput) return;
+
+      if (e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.code === 'Space') {
+        e.preventDefault();
+        toggleFlip();
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        nextCard();
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        prevCard();
+      }
+    });
   </script>
 </body>
 </html>
