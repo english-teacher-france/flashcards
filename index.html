@@ -618,11 +618,9 @@
     <div class="scene" id="card-scene">
       <div class="card" id="card">
         <div class="card-face card-front">
-          <div class="face-badge">Recto</div>
           <div class="card-text" id="recto-text"></div>
         </div>
         <div class="card-face card-back">
-          <div class="face-badge">Verso</div>
           <div class="card-text" id="verso-text"></div>
         </div>
       </div>
@@ -1225,11 +1223,20 @@
       appView.style.display = 'flex';
     }
 
+    function resetCardToFrontInstantly() {
+      if (!isFlipped && !cardElement.classList.contains('is-flipped')) return;
+
+      // La navigation change le contenu : revenir au recto sans laisser la
+      // transition 3D afficher l'ancien verso (ou le verso de la nouvelle carte).
+      cardElement.style.transition = 'none';
+      cardElement.classList.remove('is-flipped');
+      isFlipped = false;
+      void cardElement.offsetWidth;
+      cardElement.style.removeProperty('transition');
+    }
+
     function showCard() {
-      if (isFlipped) {
-        cardElement.classList.remove('is-flipped');
-        isFlipped = false;
-      }
+      resetCardToFrontInstantly();
 
       const card = cards[currentIndex];
       rectoText.innerText = card.front;
