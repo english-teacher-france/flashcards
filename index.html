@@ -401,6 +401,27 @@
       touch-action: pan-y pinch-zoom;
     }
 
+    /* Défilement latéral de la scène, sans perturber le retournement 3D */
+    .scene.is-exiting-left { animation: card-exit-left 220ms ease-in both; }
+    .scene.is-exiting-right { animation: card-exit-right 220ms ease-in both; }
+    .scene.is-entering-left { animation: card-enter-left 260ms ease-out both; }
+    .scene.is-entering-right { animation: card-enter-right 260ms ease-out both; }
+
+    @keyframes card-exit-left {
+      to { opacity: 0; transform: translateX(-110%) rotate(-7deg); }
+    }
+    @keyframes card-exit-right {
+      to { opacity: 0; transform: translateX(110%) rotate(7deg); }
+    }
+    @keyframes card-enter-left {
+      from { opacity: 0; transform: translateX(-32px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes card-enter-right {
+      from { opacity: 0; transform: translateX(32px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
     .card {
       width: 100%;
       height: 100%;
@@ -638,6 +659,7 @@
     let cards = [];
     let currentIndex = 0;
     let isFlipped = false;
+    let isNavigating = false;
 
     // Arbre : racine { folders: Map, files: [] }
     let treeRoot = null;
@@ -1228,17 +1250,51 @@
       cardElement.classList.toggle('is-flipped', isFlipped);
     }
 
+    function animateCardChange(direction, updateIndex) {
+      if (isNavigating) return;
+      isNavigating = true;
+      const exitClass = direction === 'left' ? 'is-exiting-left' : 'is-exiting-right';
+      const enterClass = direction === 'left' ? 'is-entering-right' : 'is-entering-left';
+      const animationClasses = [
+        'is-exiting-left', 'is-exiting-right', 'is-entering-left', 'is-entering-right'
+      ];
+
+      const runAnimation = (className, onComplete) => {
+        cardScene.classList.remove(...animationClasses);
+        // Force le recalcul pour pouvoir rejouer proprement la même animation.
+        void cardScene.offsetWidth;
+        let finished = false;
+        let fallbackTimer;
+        const finish = (event) => {
+          if (finished || (event && event.target !== cardScene)) return;
+          finished = true;
+          clearTimeout(fallbackTimer);
+          cardScene.removeEventListener('animationend', finish);
+          cardScene.classList.remove(className);
+          onComplete();
+        };
+        cardScene.addEventListener('animationend', finish);
+        cardScene.classList.add(className);
+        // Secours pour les navigateurs qui n'émettent pas animationend.
+        fallbackTimer = setTimeout(() => finish(), 350);
+      };
+
+      runAnimation(exitClass, () => {
+        updateIndex();
+        showCard();
+        runAnimation(enterClass, () => { isNavigating = false; });
+      });
+    }
+
     function nextCard() {
       if (currentIndex < cards.length - 1) {
-        currentIndex++;
-        showCard();
+        animateCardChange('left', () => { currentIndex++; });
       }
     }
 
     function prevCard() {
       if (currentIndex > 0) {
-        currentIndex--;
-        showCard();
+        animateCardChange('right', () => { currentIndex--; });
       }
     }
 
