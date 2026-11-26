@@ -1,0 +1,572 @@
+/* Variables de thèmes */
+:root[data-theme="dark"] {
+  --bg: #0f172a;
+  --card-front: #1e293b;
+  --card-back: #334155;
+  --text: #f8fafc;
+  --text-muted: #94a3b8;
+  --input-bg: #020617;
+  --accent: #38bdf8;
+  --accent-hover: #0284c7;
+  --danger: #f43f5e;
+  --danger-hover: #e11d48;
+  --border: #475569;
+  --box-bg: rgba(30, 41, 59, 0.5);
+  --hover-bg: rgba(148, 163, 184, 0.12);
+  --shadow: rgba(0, 0, 0, 0.4);
+}
+
+:root[data-theme="light"] {
+  --bg: #f8fafc;
+  --card-front: #ffffff;
+  --card-back: #e2e8f0;
+  --text: #0f172a;
+  --text-muted: #64748b;
+  --input-bg: #ffffff;
+  --accent: #0284c7;
+  --accent-hover: #0369a1;
+  --danger: #e11d48;
+  --danger-hover: #be123c;
+  --border: #cbd5e1;
+  --box-bg: rgba(255, 255, 255, 0.8);
+  --hover-bg: rgba(15, 23, 42, 0.06);
+  --shadow: rgba(0, 0, 0, 0.1);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: system-ui, -apple-system, sans-serif;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  position: relative;
+}
+
+/* Bouton thème */
+#theme-toggle {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  background: var(--card-front);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 0.5rem 0.8rem;
+  border-radius: 9999px;
+  cursor: pointer;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 2px 5px var(--shadow);
+  z-index: 100;
+}
+
+#theme-toggle:hover {
+  border-color: var(--accent);
+  background: var(--card-front);
+}
+
+/* Toast */
+#toast {
+  position: fixed;
+  top: 20px;
+  background: var(--accent);
+  color: #ffffff;
+  padding: 0.65rem 1.25rem;
+  border-radius: 9999px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  box-shadow: 0 4px 15px var(--shadow);
+  opacity: 0;
+  transform: translateY(-20px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  pointer-events: none;
+  z-index: 1000;
+}
+
+#toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Configuration */
+#setup-view {
+  width: 100%;
+  max-width: 650px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin-top: 2rem;
+}
+
+.setup-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.preset-box {
+  background: var(--box-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+textarea {
+  width: 100%;
+  height: 200px;
+  background-color: var(--input-bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.75rem;
+  font-family: monospace;
+  font-size: 0.95rem;
+  resize: vertical;
+}
+
+textarea:focus, select:focus, input[type="search"]:focus {
+  outline: 2px solid var(--accent);
+}
+
+.controls-row {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+select {
+  background-color: var(--input-bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+button {
+  background-color: var(--accent);
+  color: #ffffff;
+  border: none;
+  padding: 0.65rem 1.25rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+button:hover {
+  background-color: var(--accent-hover);
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+button.secondary {
+  background-color: var(--card-back);
+  color: var(--text);
+}
+
+button.secondary:hover {
+  background-color: var(--border);
+}
+
+button.secondary.active {
+  background-color: var(--accent);
+  color: #ffffff;
+}
+
+button.danger {
+  background-color: transparent;
+  color: var(--danger);
+  border: 1px solid var(--danger);
+  padding: 0.4rem 0.8rem;
+  font-size: 0.85rem;
+}
+
+button.danger:hover {
+  background-color: var(--danger);
+  color: #ffffff;
+}
+
+button.small {
+  padding: 0.3rem 0.65rem;
+  font-size: 0.8rem;
+}
+
+/* --- ARBRE DES DECKS --- */
+.tree-toolbar {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.tree-toolbar input[type="search"] {
+  flex: 1;
+  min-width: 140px;
+  background-color: var(--input-bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.45rem 0.7rem;
+  font-size: 0.9rem;
+}
+
+#deck-tree {
+  max-height: 280px;
+  overflow-y: auto;
+  background: var(--input-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.4rem;
+  font-size: 0.95rem;
+  user-select: none;
+}
+
+#deck-tree .tree-message {
+  color: var(--text-muted);
+  padding: 0.75rem;
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+.tree-node {
+  list-style: none;
+}
+
+.tree-children {
+  margin-left: 1.15rem;
+  padding-left: 0.4rem;
+  border-left: 1px dashed var(--border);
+}
+
+.tree-children.collapsed {
+  display: none;
+}
+
+.tree-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.28rem 0.4rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.tree-row:hover {
+  background: var(--hover-bg);
+}
+
+.tree-toggle {
+  width: 1.1rem;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  flex-shrink: 0;
+  transition: transform 0.15s ease;
+}
+
+.tree-toggle.open {
+  transform: rotate(90deg);
+}
+
+.tree-toggle.leaf {
+  visibility: hidden;
+}
+
+.tree-row input[type="checkbox"] {
+  accent-color: var(--accent);
+  width: 1rem;
+  height: 1rem;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.tree-label {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tree-label.folder {
+  font-weight: 600;
+}
+
+.tree-count {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  background: var(--hover-bg);
+  border-radius: 9999px;
+  padding: 1px 8px;
+  flex-shrink: 0;
+}
+
+.tree-summary {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+/* Vue Flashcards */
+#app-view {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+  width: 100%;
+  max-width: 650px;
+  margin-top: 2rem;
+}
+
+.top-bar {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.top-bar #edit-btn {
+  justify-self: start;
+}
+
+.top-bar-right {
+  justify-self: end;
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.counter {
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: var(--text-muted);
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* Mode tableau / projection */
+body.projection-mode {
+  padding: 1rem;
+}
+
+body.projection-mode #app-view {
+  max-width: 94vw;
+  margin-top: 0.5rem;
+  gap: 1rem;
+}
+
+body.projection-mode .scene {
+  height: min(68vh, 650px);
+}
+
+body.projection-mode .card-face {
+  padding: 3rem;
+}
+
+body.projection-mode .card-text {
+  font-size: clamp(2.25rem, 4.5vw, 4rem);
+  line-height: 1.3;
+}
+
+body.projection-mode .counter {
+  font-size: 1.3rem;
+}
+
+/* Barre de progression */
+.progress-track {
+  width: 100%;
+  height: 6px;
+  background: var(--card-back);
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  width: 0%;
+  background: var(--accent);
+  border-radius: 9999px;
+  transition: width 0.3s ease;
+}
+
+/* Scène 3D */
+.scene {
+  width: 100%;
+  height: 360px;
+  perspective: 1000px;
+  cursor: pointer;
+  touch-action: pan-y pinch-zoom;
+}
+
+/* Défilement latéral de la scène, sans perturber le retournement 3D */
+.scene.is-exiting-left { animation: card-exit-left 220ms ease-in both; }
+.scene.is-exiting-right { animation: card-exit-right 220ms ease-in both; }
+.scene.is-entering-left { animation: card-enter-left 260ms ease-out both; }
+.scene.is-entering-right { animation: card-enter-right 260ms ease-out both; }
+
+@keyframes card-exit-left {
+  to { opacity: 0; transform: translateX(-110%) rotate(-7deg); }
+}
+@keyframes card-exit-right {
+  to { opacity: 0; transform: translateX(110%) rotate(7deg); }
+}
+@keyframes card-enter-left {
+  from { opacity: 0; transform: translateX(-32px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes card-enter-right {
+  from { opacity: 0; transform: translateX(32px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.card {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+  box-shadow: 0 10px 25px var(--shadow);
+  border-radius: 12px;
+}
+
+.card.is-flipped {
+  transform: rotateX(180deg);
+}
+
+.card-face {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 2.5rem;
+  text-align: center;
+  border-radius: 12px;
+  border: 2px solid var(--border);
+}
+
+.card-front {
+  background-color: var(--card-front);
+}
+
+.card-back {
+  background-color: var(--card-back);
+  transform: rotateX(180deg);
+}
+
+.card-text {
+  font-size: 1.75rem;
+  font-weight: 600;
+  line-height: 1.4;
+  word-break: break-word;
+  white-space: pre-line;
+}
+
+.face-badge {
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  background: rgba(0, 0, 0, 0.15);
+  padding: 4px 10px;
+  border-radius: 4px;
+  color: var(--text-muted);
+}
+
+.card-nav {
+  display: flex;
+  gap: 1rem;
+  width: 100%;
+  justify-content: center;
+}
+
+.nav-btn {
+  flex: 1;
+  padding: 0.75rem;
+}
+
+.help-hint {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  text-align: center;
+  line-height: 1.6;
+}
+
+.touch-hint {
+  display: none;
+}
+
+@media (pointer: coarse) {
+  .touch-hint { display: block; }
+  .kbd-hint { display: none; }
+}
+
+kbd {
+  background: var(--card-front);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 0.8rem;
+}
+
+@media (max-width: 480px) {
+  .top-bar button {
+    padding: 0.5rem 0.65rem;
+    font-size: 0.85rem;
+  }
+
+  .counter {
+    font-size: 0.95rem;
+  }
+
+  .card-text {
+    font-size: 1.4rem;
+  }
+
+  .card-face {
+    padding: 1.75rem 1.25rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card, .progress-fill {
+    transition: none;
+  }
+}
