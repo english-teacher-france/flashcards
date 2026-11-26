@@ -208,6 +208,11 @@
       background-color: var(--border);
     }
 
+    button.secondary.active {
+      background-color: var(--accent);
+      color: #ffffff;
+    }
+
     button.danger {
       background-color: transparent;
       color: var(--danger);
@@ -363,8 +368,11 @@
       justify-self: start;
     }
 
-    .top-bar #shuffle-btn {
+    .top-bar-right {
       justify-self: end;
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
     }
 
     .counter {
@@ -373,6 +381,34 @@
       color: var(--text-muted);
       text-align: center;
       white-space: nowrap;
+    }
+
+    /* Mode tableau / projection */
+    body.projection-mode {
+      padding: 1rem;
+    }
+
+    body.projection-mode #app-view {
+      max-width: 94vw;
+      margin-top: 0.5rem;
+      gap: 1rem;
+    }
+
+    body.projection-mode .scene {
+      height: min(68vh, 650px);
+    }
+
+    body.projection-mode .card-face {
+      padding: 3rem;
+    }
+
+    body.projection-mode .card-text {
+      font-size: clamp(2.25rem, 4.5vw, 4rem);
+      line-height: 1.3;
+    }
+
+    body.projection-mode .counter {
+      font-size: 1.3rem;
     }
 
     /* Barre de progression */
@@ -608,7 +644,10 @@
     <div class="top-bar">
       <button id="edit-btn" class="secondary" title="Vider et changer de liste">Changer de liste</button>
       <span class="counter" id="counter" aria-live="polite">Carte 0 / 0</span>
-      <button id="shuffle-btn" class="secondary" title="Mélanger l'ordre des cartes">🔀 Mélanger</button>
+      <div class="top-bar-right">
+        <button id="projection-btn" class="secondary" title="Agrandir la carte pour projection sur tableau" aria-pressed="false">🖥️ Tableau</button>
+        <button id="shuffle-btn" class="secondary" title="Mélanger l'ordre des cartes">🔀 Mélanger</button>
+      </div>
     </div>
 
     <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progress-track">
@@ -683,6 +722,7 @@
     const nextBtn = $('next-btn');
     const flipBtn = $('flip-btn');
     const shuffleBtn = $('shuffle-btn');
+    const projectionBtn = $('projection-btn');
     const counter = $('counter');
     const progressFill = $('progress-fill');
     const progressTrack = $('progress-track');
@@ -721,6 +761,18 @@
     });
 
     initTheme();
+
+    /* ======================================================
+       MODE TABLEAU / PROJECTION
+       ====================================================== */
+    function toggleProjectionMode() {
+      const active = document.body.classList.toggle('projection-mode');
+      projectionBtn.classList.toggle('active', active);
+      projectionBtn.setAttribute('aria-pressed', active ? 'true' : 'false');
+      showToast(active ? 'Mode tableau activé 🖥️' : 'Mode tableau désactivé');
+    }
+
+    projectionBtn.addEventListener('click', toggleProjectionMode);
 
     /* ======================================================
        TOAST
